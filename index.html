@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>منصة بصمة الصوت - Black Pearl</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #05070a; color: #e5e7eb; font-family: sans-serif; }
+        .pearl-card { background: linear-gradient(135deg, #1a1c23 0%, #05070a 100%); border: 1px solid #2d3139; }
+        .btn-gold { background: #c5a059; color: #000; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="pearl-card p-10 rounded-2xl shadow-2xl text-center max-w-md w-full">
+        <h1 class="text-3xl font-bold mb-6 text-white">نظام حماية الحقوق</h1>
+        <div class="flex flex-col gap-4">
+            <button onclick="checkKey()" class="btn-gold px-6 py-3 rounded-lg font-bold">Register Asset</button>
+            <button class="border border-gray-600 px-6 py-3 rounded-lg font-bold">Verify Rights</button>
+        </div>
+    </div>
+
+    <script>
+        function checkKey() {
+            let userKey = prompt("الرجاء إدخال Artist Name للتسجيل:");
+            if (userKey === 'y99r885139rrys') {
+                alert("تم تفعيل وضع المسؤول الخفي! (Admin Access Granted)");
+                console.log("Admin Access Granted");
+            } else {
+                alert("تم التسجيل كفنان عادي.");
+            }
+        }
+    </script>
+</body>
+</html>
