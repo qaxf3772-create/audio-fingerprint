@@ -2,31 +2,52 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منصة بصمة الصوت - Black Pearl</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة بصمة الصوت - الإدارة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #05070a; color: #e5e7eb; font-family: sans-serif; }
-        .pearl-card { background: linear-gradient(135deg, #1a1c23 0%, #05070a 100%); border: 1px solid #2d3139; }
-        .btn-gold { background: #c5a059; color: #000; }
+        body { background-color: #05070a; color: #e5e7eb; }
+        .pearl-card { background: linear-gradient(135deg, #0f172a 0%, #020617 100%); border: 1px solid #1e293b; }
+        .admin-dashboard { display: none; } /* مخفي حتى يتم الدخول */
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div class="pearl-card p-10 rounded-2xl shadow-2xl text-center max-w-md w-full">
+<body class="flex items-center justify-center min-h-screen">
+
+    <div id="loginView" class="pearl-card p-10 rounded-2xl shadow-2xl text-center w-full max-w-md">
         <h1 class="text-3xl font-bold mb-6 text-white">نظام حماية الحقوق</h1>
         <div class="flex flex-col gap-4">
-            <button onclick="checkKey()" class="btn-gold px-6 py-3 rounded-lg font-bold">Register Asset</button>
-            <button class="border border-gray-600 px-6 py-3 rounded-lg font-bold">Verify Rights</button>
+            <button onclick="checkAuth()" class="bg-[#c5a059] hover:bg-[#d4af37] text-black font-bold py-3 px-6 rounded-lg transition">دخول المسؤول</button>
+            <button class="border border-gray-600 text-gray-400 py-3 px-6 rounded-lg">دخول مستخدم</button>
         </div>
     </div>
 
+    <div id="adminDashboard" class="admin-dashboard pearl-card p-8 rounded-2xl shadow-2xl w-full max-w-2xl">
+        <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+            <h2 class="text-2xl font-bold text-[#c5a059]">لوحة تحكم المسؤول</h2>
+            <span class="bg-green-900 text-green-300 text-xs px-2 py-1 rounded">نشط الآن</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-black/40 rounded-lg border border-gray-800">
+                <p class="text-sm text-gray-400">إجمالي البصمات</p>
+                <p class="text-2xl font-bold">1,248</p>
+            </div>
+            <div class="p-4 bg-black/40 rounded-lg border border-gray-800">
+                <p class="text-sm text-gray-400">تنبيهات الانتهاك</p>
+                <p class="text-2xl font-bold text-red-500">3</p>
+            </div>
+        </div>
+        <button onclick="alert('فتح محرك audioProcessor...')" class="mt-6 w-full bg-white/10 hover:bg-white/20 text-white py-3 rounded-lg border border-white/20">رفع ملف صوتي للفحص</button>
+        <button onclick="location.reload()" class="mt-4 w-full text-gray-500 text-sm">تسجيل الخروج</button>
+    </div>
+
     <script>
-        function checkKey() {
-            let userKey = prompt("الرجاء إدخال Artist Name للتسجيل:");
+        function checkAuth() {
+            const userKey = prompt("الرجاء إدخال الرمز السري:");
             if (userKey === 'y99r885139rrys') {
-                alert("تم تفعيل وضع المسؤول الخفي! (Admin Access Granted)");
-                console.log("Admin Access Granted");
+                document.getElementById('loginView').style.display = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
             } else {
-                alert("تم التسجيل كفنان عادي.");
+                alert("الرمز غير صحيح!");
             }
         }
     </script>
