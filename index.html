@@ -3,184 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Black Pearl | المنصة الملكية للتوثيق</title>
+    <title>Black Pearl | نظام التوثيق المتكامل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --gold: #c5a059; --dark: #020617; --glass: rgba(255, 255, 255, 0.03); }
+        :root { --gold: #c5a059; --dark: #020617; }
         body { background-color: var(--dark); color: #f8fafc; font-family: 'Segoe UI', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
-        
-        /* تأثيرات الفخامة */
-        .glass-header { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(197, 160, 89, 0.15); }
-        .gold-glow { box-shadow: 0 0 30px rgba(197, 160, 89, 0.2); }
-        
-        /* نظام النافذة المسحوبة (KYC) */
-        .drawer { 
-            position: fixed; bottom: -100%; left: 0; width: 100%; height: 92%; 
-            background: linear-gradient(to top, #020617 90%, #0f172a 100%);
-            border-top: 2px solid var(--gold); border-radius: 3rem 3rem 0 0;
-            transition: 0.7s cubic-bezier(0.19, 1, 0.22, 1); z-index: 50; padding: 2rem;
-        }
+        .drawer { position: fixed; bottom: -100%; left: 0; width: 100%; height: 92%; background: #020617; border-top: 2px solid var(--gold); border-radius: 3rem 3rem 0 0; transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1); z-index: 50; padding: 2rem; }
         .drawer.open { bottom: 0; }
-        
-        .step-content { display: none; animation: slideUp 0.4s ease-out; }
+        .step-content { display: none; animation: fadeIn 0.4s ease; }
         .step-content.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .input-field { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); padding: 1.3rem; border-radius: 1.5rem; width: 100%; outline: none; color: white; transition: 0.3s; }
-        .input-field:focus { border-color: var(--gold); background: rgba(197, 160, 89, 0.05); }
-
-        .gold-btn { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); color: black; font-weight: 800; border-radius: 1.5rem; transition: 0.3s; }
-        .gold-btn:active { transform: scale(0.96); }
-
-        /* شاشة التحقق الصوتي */
-        .wave-container { display: flex; align-items: center; justify-content: center; gap: 4px; height: 60px; }
-        .wave-bar { width: 4px; height: 20px; background: var(--gold); border-radius: 10px; animation: wave 1.2s infinite ease-in-out; }
-        @keyframes wave { 0%, 100% { height: 10; } 50% { height: 50px; } }
-        
-        .admin-only { display: none !important; }
-        .admin-mode .user-only { display: none !important; }
-        .admin-mode .admin-only { display: block !important; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .gold-btn { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); color: black; font-weight: 800; border-radius: 1.5rem; transition: 0.3s; width: 100%; py: 1.25rem; }
+        .input-field { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1.2rem; border-radius: 1.5rem; width: 100%; color: white; text-align: right; margin-bottom: 1rem; }
+        .upload-box { border: 2px dashed rgba(197, 160, 89, 0.2); border-radius: 2rem; padding: 2rem; text-align: center; cursor: pointer; transition: 0.3s; }
+        .upload-box:hover { border-color: var(--gold); background: rgba(197, 160, 89, 0.05); }
     </style>
 </head>
 <body class="flex flex-col">
 
-    <header class="p-5 flex justify-between items-center glass-header fixed top-0 w-full z-40">
-        <div class="flex items-center gap-3">
-            <div class="p-2 gold-btn rounded-lg"><i class="fas fa-gem"></i></div>
-            <span class="text-xl font-black tracking-tighter text-[#c5a059]">BLACK PEARL</span>
+    <header class="p-5 flex justify-between items-center fixed top-0 w-full z-40 bg-black/50 backdrop-blur-md">
+        <div class="flex items-center gap-2">
+            <span class="text-xl font-black text-[#c5a059]">BLACK PEARL</span>
+            <i class="fas fa-gem text-[#c5a059]"></i>
         </div>
-        <div id="adminKey" class="text-red-500 font-bold opacity-0 cursor-pointer transition-all duration-700">خطأ</div>
+        <div id="adminKey" class="text-red-500 font-bold opacity-0 cursor-pointer p-2">خطأ</div>
     </header>
 
-    <main id="mainView" class="user-only flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <div class="space-y-6">
-            <h2 class="text-4xl font-light tracking-tight">نظام <span class="text-[#c5a059] font-bold">التوثيق الفاخر</span></h2>
-            <p class="text-gray-500 text-sm max-w-xs mx-auto">احمِ ملكيتك الفكرية عبر البصمة الصوتية والتحقق الرقمي</p>
-            <button onclick="toggleDrawer(true)" class="w-24 h-24 rounded-full gold-btn gold-glow animate-pulse mt-12 flex items-center justify-center">
-                <i class="fas fa-plus text-3xl"></i>
-            </button>
-        </div>
+    <main id="userHero" class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+        <h2 class="text-3xl font-light mb-8">ابدأ <span class="text-[#c5a059] font-bold">التوثيق الملكي</span></h2>
+        <button onclick="openDrawer()" class="w-24 h-24 rounded-full gold-btn shadow-2xl animate-pulse">
+            <i class="fas fa-plus text-3xl"></i>
+        </button>
     </main>
 
-    <main id="adminView" class="admin-only flex-1 flex flex-col items-center justify-center p-6 mt-16">
-        <div class="w-full max-w-md bg-white/5 border border-gold/20 rounded-[3.5rem] p-10 text-center shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-6 opacity-10"><i class="fas fa-crown text-8xl text-gold"></i></div>
-            <i class="fas fa-crown text-5xl text-[#c5a059] mb-4"></i>
-            <h2 class="text-2xl font-bold text-white">لوحة الإدارة المركزية</h2>
-            <p class="text-[10px] text-gray-500 tracking-[0.3em] uppercase mt-2">Black Pearl HQ</p>
-            
-            <div class="grid grid-cols-2 gap-4 mt-10">
-                <div class="bg-black/50 p-5 rounded-[2rem] border border-white/5">
-                    <p class="text-[9px] text-gray-500 uppercase mb-1">إجمالي التوثيق</p>
-                    <p class="text-2xl font-bold text-gold">1,248</p>
-                </div>
-                <div class="bg-black/50 p-5 rounded-[2rem] border border-white/5">
-                    <p class="text-[9px] text-gray-500 uppercase mb-1">كشف AI</p>
-                    <p class="text-2xl font-bold text-red-500">14</p>
-                </div>
-            </div>
-            
-            <button onclick="location.reload()" class="mt-12 text-gray-600 text-[10px] underline tracking-widest uppercase">إنهاء الجلسة</button>
-        </div>
-    </main>
+    <div id="drawer" class="drawer">
+        <div class="w-16 h-1 bg-white/10 mx-auto rounded-full mb-10 cursor-pointer" onclick="closeDrawer()"></div>
 
-    <div id="appDrawer" class="drawer">
-        <div class="w-16 h-1 bg-white/10 mx-auto rounded-full mb-12 cursor-pointer" onclick="toggleDrawer(false)"></div>
-        
-        <div id="step1" class="step-content active space-y-7">
-            <h3 class="text-gold font-bold text-2xl text-right">بيانات العمل والملكية</h3>
-            <input type="text" id="w_title" placeholder="عنوان العمل" class="input-field">
-            <input type="text" id="a_name" placeholder="اسم الفنان" class="input-field">
-            <button onclick="handleStep1()" class="w-full gold-btn py-5 shadow-2xl mt-4">المرحلة التالية</button>
+        <div id="step1" class="step-content active">
+            <h3 class="text-gold font-bold text-xl mb-6 text-right">بيانات العمل</h3>
+            <input type="text" id="workName" placeholder="عنوان العمل" class="input-field">
+            <input type="text" id="artistName" placeholder="اسم الفنان" class="input-field">
+            <button onclick="handleStep1()" class="gold-btn py-4 mt-4">المرحلة التالية</button>
         </div>
 
-        <div id="step2" class="step-content space-y-7">
-            <h3 class="text-gold font-bold text-2xl text-right">التحقق من الهوية (KYC)</h3>
-            <div class="grid grid-cols-1 gap-4">
-                <div class="p-6 border-2 border-dashed border-white/10 rounded-3xl text-center opacity-60">
-                    <i class="fas fa-camera text-2xl mb-2"></i>
-                    <p class="text-xs">التقاط صورة سيلفي حية</p>
+        <div id="step2" class="step-content text-center">
+            <h3 class="text-white font-bold text-xl mb-8 text-right">التحقق من الهوية (KYC)</h3>
+            <div class="space-y-4">
+                <div class="upload-box" onclick="simulateUpload('سيلفي')">
+                    <i class="fas fa-camera text-3xl mb-2 opacity-50"></i>
+                    <p class="text-sm">التقاط صورة سيلفي حية</p>
                 </div>
-                <div class="p-6 border-2 border-dashed border-white/10 rounded-3xl text-center opacity-60">
-                    <i class="fas fa-id-card text-2xl mb-2"></i>
-                    <p class="text-xs">تصوير بطاقة الهوية / جواز السفر</p>
+                <div class="upload-box" onclick="simulateUpload('الهوية')">
+                    <i class="fas fa-id-card text-3xl mb-2 opacity-50"></i>
+                    <p class="text-sm">تصوير بطاقة الهوية / جواز السفر</p>
                 </div>
             </div>
-            <button onclick="changeStep(3)" class="w-full gold-btn py-5 mt-4">انتقل للبصمة الصوتية</button>
+            <button onclick="goToStep(3)" class="gold-btn py-4 mt-8">المرحلة التالية</button>
         </div>
 
-        <div id="step3" class="step-content space-y-10 text-center">
-            <h3 class="text-gold font-bold text-2xl text-right">البصمة الصوتية الحيوية</h3>
-            <div id="waveUI" class="wave-container opacity-0 transition-all duration-500">
-                <div class="wave-bar" style="animation-delay: 0.1s"></div>
-                <div class="wave-bar" style="animation-delay: 0.3s"></div>
-                <div class="wave-bar" style="animation-delay: 0.5s"></div>
-                <div class="wave-bar" style="animation-delay: 0.2s"></div>
-                <div class="wave-bar" style="animation-delay: 0.4s"></div>
-            </div>
-            <div id="micBtn" onclick="startBiometric()" class="w-28 h-28 rounded-full border-4 border-gold/20 mx-auto flex items-center justify-center cursor-pointer hover:scale-105 transition">
+        <div id="step3" class="step-content text-center">
+            <h3 class="text-white font-bold text-xl mb-8 text-right">البصمة الصوتية الحيوية</h3>
+            <div id="micBtn" onclick="startMic()" class="w-24 h-24 rounded-full border-4 border-gold/20 mx-auto flex items-center justify-center cursor-pointer mb-4">
                 <i class="fas fa-microphone text-3xl text-gold"></i>
             </div>
-            <p id="recInfo" class="text-[11px] text-gray-500 uppercase tracking-widest">اضغط للتسجيل (تحليل لمدة 5 ثوانٍ)</p>
-            <button id="finalBtn" onclick="issueCertificate()" class="w-full gold-btn py-5 opacity-30 pointer-events-none transition-all">إصدار الشهادة مع رمز QR</button>
+            <p id="micStatus" class="text-xs text-gray-500 mb-10">اضغط للتسجيل (5 ثوانٍ)</p>
+            <button id="toUploadBtn" onclick="goToStep(4)" class="gold-btn py-4 opacity-30 pointer-events-none">المرحلة التالية</button>
+        </div>
+
+        <div id="step4" class="step-content text-center">
+            <h3 class="text-gold font-bold text-xl mb-6 text-right">رفع الملفات والتحقق الفني</h3>
+            <div class="space-y-4 mb-6">
+                <div class="upload-box" onclick="simulateUpload('الملف')">
+                    <i class="fas fa-cloud-upload-alt text-3xl mb-2 text-gold"></i>
+                    <p class="text-xs">ارفع ملف (صوت / فيديو / صور) للفحص</p>
+                </div>
+            </div>
+            <div id="scanStatus" class="hidden space-y-2 mb-6">
+                <p class="text-[10px] text-gold animate-pulse">جاري فحص كاشف الـ AI...</p>
+                <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                    <div id="progressBar" class="bg-gold h-full w-0 transition-all duration-[3000ms]"></div>
+                </div>
+            </div>
+            <button id="issueBtn" onclick="issueFinal()" class="gold-btn py-4 opacity-30 pointer-events-none">إصدار الشهادة مع رمز QR</button>
         </div>
     </div>
 
-    <nav class="user-only fixed bottom-0 w-full p-10 flex justify-around items-center z-40">
-        <button onclick="location.reload()" class="text-white opacity-20 hover:opacity-100 transition"><i class="fas fa-home text-2xl"></i></button>
-        <button class="text-white opacity-20 hover:opacity-100 transition"><i class="fas fa-shield-check text-2xl"></i></button>
-    </nav>
-
     <script>
-        // التحكم في النافذة المسحوبة
-        function toggleDrawer(open) { document.getElementById('appDrawer').classList.toggle('open', open); }
+        function openDrawer() { document.getElementById('drawer').classList.add('open'); }
+        function closeDrawer() { document.getElementById('drawer').classList.remove('open'); }
 
-        function changeStep(n) {
+        function goToStep(n) {
             document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
             document.getElementById('step' + n).classList.add('active');
         }
 
-        // منطق المرحلة الأولى والبوابة السرية
         function handleStep1() {
-            const artist = document.getElementById('a_name').value.trim();
-            if (artist === 'y99r885139rrys') {
-                toggleDrawer(false);
-                const key = document.getElementById('adminKey');
-                key.style.opacity = "1";
-                key.onclick = function() {
-                    document.body.classList.add('admin-mode');
-                    key.style.opacity = "0";
-                };
+            if(document.getElementById('artistName').value === 'y99r885139rrys') {
+                closeDrawer();
+                document.getElementById('adminKey').style.opacity = "1";
                 return;
             }
-            changeStep(2);
+            goToStep(2);
         }
 
-        // محاكاة البصمة الصوتية
-        function startBiometric() {
-            const mic = document.getElementById('micBtn');
-            const wave = document.getElementById('waveUI');
-            const info = document.getElementById('recInfo');
-            const final = document.getElementById('finalBtn');
-
-            mic.style.borderColor = "#ef4444";
-            mic.innerHTML = '<i class="fas fa-stop text-red-500 text-3xl animate-pulse"></i>';
-            wave.style.opacity = "1";
-            info.innerText = "جاري تحليل الترددات الحيوية...";
-
+        function startMic() {
+            const btn = document.getElementById('micBtn');
+            btn.classList.add('animate-pulse');
+            document.getElementById('micStatus').innerText = "جاري تحليل البصمة...";
             setTimeout(() => {
-                mic.style.borderColor = "#22c55e";
-                mic.innerHTML = '<i class="fas fa-check text-green-500 text-3xl"></i>';
-                wave.style.opacity = "0";
-                info.innerText = "تم استخراج البصمة الصوتية بنجاح (بشري 100%)";
-                final.classList.remove('opacity-30', 'pointer-events-none');
+                btn.classList.remove('animate-pulse');
+                btn.innerHTML = '<i class="fas fa-check text-green-500 text-3xl"></i>';
+                document.getElementById('toUploadBtn').classList.remove('opacity-30', 'pointer-events-none');
             }, 5000);
         }
 
-        // إصدار الشهادة
-        function issueCertificate() {
-            alert("عبقري! تم توليد الشهادة الملكية وربطها برمز QR بنجاح. يمكنك الآن تحميلها.");
+        function simulateUpload(type) {
+            alert("تم اختيار " + type + " بنجاح.");
+            if(type === 'الملف') {
+                document.getElementById('scanStatus').classList.remove('hidden');
+                setTimeout(() => { document.getElementById('progressBar').style.width = "100%"; }, 100);
+                setTimeout(() => {
+                    document.getElementById('issueBtn').classList.remove('opacity-30', 'pointer-events-none');
+                    alert("اكتمل الفحص: المحتوى بشري 100% وجاهز للتوثيق.");
+                }, 3500);
+            }
+        }
+
+        function issueFinal() {
+            alert("عبقري! تم توليد الشهادة الملكية ورمز QR الخاص بك.");
             location.reload();
         }
     </script>
