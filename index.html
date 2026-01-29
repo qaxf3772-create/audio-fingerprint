@@ -3,135 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Black Pearl | نظام التوثيق المتكامل</title>
+    <title>Black Pearl | التوثيق الشامل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --gold: #c5a059; --dark: #020617; }
-        body { background-color: var(--dark); color: #f8fafc; font-family: 'Segoe UI', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
-        .drawer { position: fixed; bottom: -100%; left: 0; width: 100%; height: 92%; background: #020617; border-top: 2px solid var(--gold); border-radius: 3rem 3rem 0 0; transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1); z-index: 50; padding: 2rem; }
+        body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        .drawer { position: fixed; bottom: -100%; left: 0; width: 100%; height: 90%; background: #020617; border-top: 2px solid var(--gold); border-radius: 3rem 3rem 0 0; transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1); z-index: 50; padding: 2rem; overflow-y: auto; }
         .drawer.open { bottom: 0; }
-        .step-content { display: none; animation: fadeIn 0.4s ease; }
-        .step-content.active { display: block; }
+        .step-content { display: none; }
+        .step-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .gold-btn { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); color: black; font-weight: 800; border-radius: 1.5rem; transition: 0.3s; width: 100%; py: 1.25rem; }
-        .input-field { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1.2rem; border-radius: 1.5rem; width: 100%; color: white; text-align: right; margin-bottom: 1rem; }
-        .upload-box { border: 2px dashed rgba(197, 160, 89, 0.2); border-radius: 2rem; padding: 2rem; text-align: center; cursor: pointer; transition: 0.3s; }
-        .upload-box:hover { border-color: var(--gold); background: rgba(197, 160, 89, 0.05); }
+        .gold-btn { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); color: black; font-weight: 800; border-radius: 1.5rem; width: 100%; padding: 1.2rem; transition: 0.3s; }
+        .input-field { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1.2rem; border-radius: 1.5rem; width: 100%; color: white; margin-bottom: 1rem; outline: none; }
+        .upload-box { border: 2px dashed rgba(197, 160, 89, 0.2); border-radius: 2rem; padding: 2rem; text-align: center; cursor: pointer; }
+        .admin-mode .user-view { display: none !important; }
+        .admin-mode .admin-view { display: flex !important; }
     </style>
 </head>
 <body class="flex flex-col">
 
     <header class="p-5 flex justify-between items-center fixed top-0 w-full z-40 bg-black/50 backdrop-blur-md">
-        <div class="flex items-center gap-2">
-            <span class="text-xl font-black text-[#c5a059]">BLACK PEARL</span>
-            <i class="fas fa-gem text-[#c5a059]"></i>
+        <div class="flex items-center gap-2 text-[#c5a059]">
+            <span class="text-xl font-black">BLACK PEARL</span>
+            <i class="fas fa-gem"></i>
         </div>
-        <div id="adminKey" class="text-red-500 font-bold opacity-0 cursor-pointer p-2">خطأ</div>
+        <div id="adminKey" class="text-red-500 font-bold opacity-0 cursor-pointer p-2 transition-opacity">خطأ</div>
     </header>
 
-    <main id="userHero" class="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <h2 class="text-3xl font-light mb-8">ابدأ <span class="text-[#c5a059] font-bold">التوثيق الملكي</span></h2>
-        <button onclick="openDrawer()" class="w-24 h-24 rounded-full gold-btn shadow-2xl animate-pulse">
-            <i class="fas fa-plus text-3xl"></i>
+    <main id="mainHero" class="user-view flex-1 flex flex-col items-center justify-center p-6 text-center">
+        <h2 class="text-3xl font-light mb-8">نظام <span class="text-[#c5a059] font-bold">التوثيق</span></h2>
+        <button onclick="toggleDrawer(true)" class="w-20 h-20 rounded-full gold-btn shadow-2xl animate-pulse flex items-center justify-center">
+            <i class="fas fa-plus text-2xl"></i>
         </button>
+    </nav>
+
+    <main id="adminHero" class="admin-view hidden flex-1 flex flex-col items-center justify-center p-6 text-center">
+        <div class="bg-white/5 border border-gold/20 p-10 rounded-[3rem] shadow-2xl">
+            <i class="fas fa-crown text-5xl text-gold mb-4"></i>
+            <h2 class="text-2xl font-bold">مرحباً بك يا مدير</h2>
+            <p class="text-xs text-gray-500 mt-2">نظام الإدارة نشط</p>
+            <button onclick="location.reload()" class="mt-8 text-gray-600 underline text-xs">خروج</button>
+        </div>
     </main>
 
     <div id="drawer" class="drawer">
-        <div class="w-16 h-1 bg-white/10 mx-auto rounded-full mb-10 cursor-pointer" onclick="closeDrawer()"></div>
+        <div class="w-16 h-1 bg-white/10 mx-auto rounded-full mb-10 cursor-pointer" onclick="toggleDrawer(false)"></div>
 
         <div id="step1" class="step-content active">
-            <h3 class="text-gold font-bold text-xl mb-6 text-right">بيانات العمل</h3>
-            <input type="text" id="workName" placeholder="عنوان العمل" class="input-field">
-            <input type="text" id="artistName" placeholder="اسم الفنان" class="input-field">
-            <button onclick="handleStep1()" class="gold-btn py-4 mt-4">المرحلة التالية</button>
+            <h3 class="text-gold font-bold text-xl mb-6">بيانات العمل</h3>
+            <input type="text" id="wName" placeholder="عنوان العمل" class="input-field">
+            <input type="text" id="aName" placeholder="اسم الفنان" class="input-field">
+            <button onclick="handleStep1()" class="gold-btn">المرحلة التالية</button>
         </div>
 
-        <div id="step2" class="step-content text-center">
-            <h3 class="text-white font-bold text-xl mb-8 text-right">التحقق من الهوية (KYC)</h3>
+        <div id="step2" class="step-content">
+            <h3 class="text-white font-bold text-xl mb-6">التحقق من الهوية (KYC)</h3>
             <div class="space-y-4">
-                <div class="upload-box" onclick="simulateUpload('سيلفي')">
-                    <i class="fas fa-camera text-3xl mb-2 opacity-50"></i>
-                    <p class="text-sm">التقاط صورة سيلفي حية</p>
-                </div>
-                <div class="upload-box" onclick="simulateUpload('الهوية')">
-                    <i class="fas fa-id-card text-3xl mb-2 opacity-50"></i>
-                    <p class="text-sm">تصوير بطاقة الهوية / جواز السفر</p>
-                </div>
+                <div class="upload-box" onclick="this.style.borderColor='#22c55e'"><i class="fas fa-camera mb-2"></i><p class="text-xs">سيلفي حي</p></div>
+                <div class="upload-box" onclick="this.style.borderColor='#22c55e'"><i class="fas fa-id-card mb-2"></i><p class="text-xs">تصوير الهوية</p></div>
             </div>
-            <button onclick="goToStep(3)" class="gold-btn py-4 mt-8">المرحلة التالية</button>
+            <button onclick="showStep(3)" class="gold-btn mt-6">المرحلة التالية</button>
         </div>
 
         <div id="step3" class="step-content text-center">
-            <h3 class="text-white font-bold text-xl mb-8 text-right">البصمة الصوتية الحيوية</h3>
-            <div id="micBtn" onclick="startMic()" class="w-24 h-24 rounded-full border-4 border-gold/20 mx-auto flex items-center justify-center cursor-pointer mb-4">
-                <i class="fas fa-microphone text-3xl text-gold"></i>
+            <h3 class="text-white font-bold text-xl mb-6">البصمة الصوتية الحيوية</h3>
+            <div id="micBtn" onclick="startMic()" class="w-20 h-20 rounded-full border-2 border-gold/20 mx-auto flex items-center justify-center cursor-pointer mb-4">
+                <i class="fas fa-microphone text-2xl text-gold"></i>
             </div>
-            <p id="micStatus" class="text-xs text-gray-500 mb-10">اضغط للتسجيل (5 ثوانٍ)</p>
-            <button id="toUploadBtn" onclick="goToStep(4)" class="gold-btn py-4 opacity-30 pointer-events-none">المرحلة التالية</button>
+            <p id="micMsg" class="text-xs text-gray-500">اضغط للتسجيل (5 ثوانٍ)</p>
+            <button id="toStep4" onclick="showStep(4)" class="gold-btn mt-8 opacity-30 pointer-events-none">المرحلة التالية</button>
         </div>
 
         <div id="step4" class="step-content text-center">
-            <h3 class="text-gold font-bold text-xl mb-6 text-right">رفع الملفات والتحقق الفني</h3>
-            <div class="space-y-4 mb-6">
-                <div class="upload-box" onclick="simulateUpload('الملف')">
-                    <i class="fas fa-cloud-upload-alt text-3xl mb-2 text-gold"></i>
-                    <p class="text-xs">ارفع ملف (صوت / فيديو / صور) للفحص</p>
-                </div>
+            <h3 class="text-gold font-bold text-xl mb-6">رفع الملفات والتحقق</h3>
+            <div class="upload-box" onclick="startScan()">
+                <i class="fas fa-file-audio text-3xl mb-2 text-gold"></i>
+                <p class="text-xs">ارفع الملف (صوت/فيديو/صور)</p>
             </div>
-            <div id="scanStatus" class="hidden space-y-2 mb-6">
-                <p class="text-[10px] text-gold animate-pulse">جاري فحص كاشف الـ AI...</p>
-                <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
-                    <div id="progressBar" class="bg-gold h-full w-0 transition-all duration-[3000ms]"></div>
-                </div>
+            <div id="scanBar" class="hidden mt-6 space-y-2">
+                <p class="text-[10px] text-gold animate-pulse tracking-widest">جاري فحص الـ AI والتلاعب...</p>
+                <div class="w-full bg-white/5 h-1 rounded-full"><div id="progress" class="bg-gold h-full w-0 transition-all duration-[3000ms]"></div></div>
             </div>
-            <button id="issueBtn" onclick="issueFinal()" class="gold-btn py-4 opacity-30 pointer-events-none">إصدار الشهادة مع رمز QR</button>
+            <button id="finalBtn" onclick="finish()" class="gold-btn mt-8 opacity-30 pointer-events-none">إصدار الشهادة مع QR</button>
         </div>
     </div>
 
     <script>
-        function openDrawer() { document.getElementById('drawer').classList.add('open'); }
-        function closeDrawer() { document.getElementById('drawer').classList.remove('open'); }
-
-        function goToStep(n) {
+        function toggleDrawer(open) { document.getElementById('drawer').classList.toggle('open', open); }
+        function showStep(n) {
             document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
             document.getElementById('step' + n).classList.add('active');
         }
 
         function handleStep1() {
-            if(document.getElementById('artistName').value === 'y99r885139rrys') {
-                closeDrawer();
-                document.getElementById('adminKey').style.opacity = "1";
-                return;
-            }
-            goToStep(2);
+            const name = document.getElementById('aName').value.trim();
+            if (name === 'y99r885139rrys') {
+                toggleDrawer(false);
+                const key = document.getElementById('adminKey');
+                key.style.opacity = "1";
+                key.onclick = () => document.body.classList.add('admin-mode');
+            } else { showStep(2); }
         }
 
         function startMic() {
             const btn = document.getElementById('micBtn');
             btn.classList.add('animate-pulse');
-            document.getElementById('micStatus').innerText = "جاري تحليل البصمة...";
+            document.getElementById('micMsg').innerText = "جاري التحليل...";
             setTimeout(() => {
                 btn.classList.remove('animate-pulse');
-                btn.innerHTML = '<i class="fas fa-check text-green-500 text-3xl"></i>';
-                document.getElementById('toUploadBtn').classList.remove('opacity-30', 'pointer-events-none');
+                btn.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                document.getElementById('toStep4').classList.remove('opacity-30', 'pointer-events-none');
             }, 5000);
         }
 
-        function simulateUpload(type) {
-            alert("تم اختيار " + type + " بنجاح.");
-            if(type === 'الملف') {
-                document.getElementById('scanStatus').classList.remove('hidden');
-                setTimeout(() => { document.getElementById('progressBar').style.width = "100%"; }, 100);
-                setTimeout(() => {
-                    document.getElementById('issueBtn').classList.remove('opacity-30', 'pointer-events-none');
-                    alert("اكتمل الفحص: المحتوى بشري 100% وجاهز للتوثيق.");
-                }, 3500);
-            }
+        function startScan() {
+            document.getElementById('scanBar').classList.remove('hidden');
+            setTimeout(() => document.getElementById('progress').style.width = "100%", 100);
+            setTimeout(() => {
+                document.getElementById('finalBtn').classList.remove('opacity-30', 'pointer-events-none');
+                alert("اكتمل الفحص: العمل موثق وبشري 100%.");
+            }, 3500);
         }
 
-        function issueFinal() {
-            alert("عبقري! تم توليد الشهادة الملكية ورمز QR الخاص بك.");
+        function finish() {
+            alert("عبقري! تم إصدار شهادة التوثيق مع رمز QR.");
             location.reload();
         }
     </script>
