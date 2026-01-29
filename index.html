@@ -2,53 +2,160 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة بصمة الصوت - الإدارة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Black Pearl - نظام الحماية</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #05070a; color: #e5e7eb; }
-        .pearl-card { background: linear-gradient(135deg, #0f172a 0%, #020617 100%); border: 1px solid #1e293b; }
-        .admin-dashboard { display: none; } /* مخفي حتى يتم الدخول */
+        body { background-color: #020617; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
+        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(197, 160, 89, 0.2); }
+        .gold-gradient { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); }
+        .gold-text { color: #c5a059; }
+        .nav-active { color: #c5a059; border-top: 2px solid #c5a059; }
+        .modal-blur { backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.85); }
+        @keyframes crown-glow { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
+        .animate-crown { animation: crown-glow 2s infinite ease-in-out; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex flex-col h-screen overflow-hidden">
 
-    <div id="loginView" class="pearl-card p-10 rounded-2xl shadow-2xl text-center w-full max-w-md">
-        <h1 class="text-3xl font-bold mb-6 text-white">نظام حماية الحقوق</h1>
-        <div class="flex flex-col gap-4">
-            <button onclick="checkAuth()" class="bg-[#c5a059] hover:bg-[#d4af37] text-black font-bold py-3 px-6 rounded-lg transition">دخول المسؤول</button>
-            <button class="border border-gray-600 text-gray-400 py-3 px-6 rounded-lg">دخول مستخدم</button>
+    <header class="p-4 flex justify-between items-center glass-panel z-10">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 gold-gradient rounded-lg flex items-center justify-center text-black shadow-lg">
+                <i class="fas fa-fingerprint"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-wider gold-text">BLACK PEARL</h1>
+        </div>
+        <button onclick="toggleModal('userModal')" class="relative group">
+            <div class="w-10 h-10 rounded-full border-2 border-[#c5a059] p-0.5 overflow-hidden transition group-active:scale-95">
+                <div class="w-full h-full bg-slate-800 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-sm gold-text"></i>
+                </div>
+            </div>
+        </button>
+    </header>
+
+    <main id="mainStage" class="flex-1 overflow-y-auto p-5 pb-24">
+        <div id="homeSection" class="space-y-6">
+            <div class="text-center py-4">
+                <h2 class="text-2xl font-bold">مرحباً بك مجدداً</h2>
+                <p class="text-gray-400 text-sm">جاهز لحماية إبداعك اليوم؟</p>
+            </div>
+            
+            <div onclick="document.getElementById('fileInput').click()" class="glass-panel p-10 rounded-[2rem] border-dashed border-2 border-slate-700 flex flex-col items-center justify-center gap-4 cursor-pointer active:scale-95 transition">
+                <div class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center shadow-inner">
+                    <i class="fas fa-plus text-2xl gold-text"></i>
+                </div>
+                <div class="text-center">
+                    <p class="font-bold">اضغط لرفع ملف جديد</p>
+                    <p class="text-xs text-gray-500">أغاني • فيديو • صور</p>
+                </div>
+                <input type="file" id="fileInput" class="hidden">
+            </div>
+        </div>
+
+        <div id="adminView" class="hidden space-y-4">
+            <div class="p-4 bg-red-900/20 border border-red-500/30 rounded-xl flex items-center gap-3">
+                <i class="fas fa-shield-alt text-red-500"></i>
+                <span class="text-xs text-red-200 uppercase font-bold tracking-widest">غرفة عمليات المدير نشطة</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="glass-panel p-4 rounded-2xl">
+                    <p class="text-[10px] text-gray-400">إجمالي المستخدمين</p>
+                    <p class="text-xl font-bold gold-text">482</p>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl">
+                    <p class="text-[10px] text-gray-400">محاولات الاختراق</p>
+                    <p class="text-xl font-bold text-red-500">0</p>
+                </div>
+            </div>
+            <button class="w-full glass-panel p-4 rounded-2xl text-right flex items-center justify-between">
+                <span>إدارة قاعدة البصمات</span>
+                <i class="fas fa-chevron-left text-xs text-gray-600"></i>
+            </button>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 w-full glass-panel flex justify-around items-center p-3 pb-6 rounded-t-[2rem]">
+        <button onclick="nav('home')" id="nav-home" class="flex flex-col items-center gap-1 nav-active transition">
+            <i class="fas fa-home text-lg"></i>
+            <span class="text-[10px]">الرئيسية</span>
+        </button>
+        <button onclick="nav('vault')" id="nav-vault" class="flex flex-col items-center gap-1 text-slate-500">
+            <i class="fas fa-layer-group text-lg"></i>
+            <span class="text-[10px]">المكتبة</span>
+        </button>
+        <button onclick="nav('certs')" id="nav-certs" class="flex flex-col items-center gap-1 text-slate-500">
+            <i class="fas fa-award text-lg"></i>
+            <span class="text-[10px]">الشهادات</span>
+        </button>
+        <button onclick="authAdmin()" id="nav-admin" class="flex flex-col items-center gap-1 text-slate-500">
+            <i class="fas fa-crown text-lg"></i>
+            <span class="text-[10px]">الإدارة</span>
+        </button>
+    </nav>
+
+    <div id="userModal" class="modal-blur fixed inset-0 z-50 hidden items-center justify-center p-6">
+        <div class="glass-panel w-full max-w-sm rounded-[2.5rem] p-8 text-center relative overflow-hidden">
+            <button onclick="toggleModal('userModal')" class="absolute top-6 left-6 text-gray-500"><i class="fas fa-times"></i></button>
+            <div class="w-24 h-24 gold-gradient rounded-3xl mx-auto mb-6 flex items-center justify-center text-4xl shadow-2xl rotate-3">
+                <span class="text-black font-black">-BP-</span>
+            </div>
+            <h3 class="text-xl font-bold">حساب المستخدم الموثق</h3>
+            <p class="text-gray-500 text-sm mb-8">id: #5139rrys</p>
+            <div class="space-y-3">
+                <div class="flex justify-between p-3 bg-white/5 rounded-xl text-sm">
+                    <span class="text-gray-400">البريد:</span>
+                    <span class="gold-text">qaxf3772@github.io</span>
+                </div>
+                <div class="flex justify-between p-3 bg-white/5 rounded-xl text-sm">
+                    <span class="text-gray-400">الباقة:</span>
+                    <span class="font-bold">المسؤول الذهبي</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="adminDashboard" class="admin-dashboard pearl-card p-8 rounded-2xl shadow-2xl w-full max-w-2xl">
-        <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
-            <h2 class="text-2xl font-bold text-[#c5a059]">لوحة تحكم المسؤول</h2>
-            <span class="bg-green-900 text-green-300 text-xs px-2 py-1 rounded">نشط الآن</span>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 bg-black/40 rounded-lg border border-gray-800">
-                <p class="text-sm text-gray-400">إجمالي البصمات</p>
-                <p class="text-2xl font-bold">1,248</p>
+    <div id="adminWelcome" class="modal-blur fixed inset-0 z-[60] hidden items-center justify-center p-6 text-center">
+        <div class="space-y-6">
+            <div class="w-32 h-32 bg-white/5 rounded-full mx-auto flex items-center justify-center border-2 border-[#c5a059] animate-crown">
+                <i class="fas fa-crown text-6xl gold-text"></i>
             </div>
-            <div class="p-4 bg-black/40 rounded-lg border border-gray-800">
-                <p class="text-sm text-gray-400">تنبيهات الانتهاك</p>
-                <p class="text-2xl font-bold text-red-500">3</p>
+            <div>
+                <h2 class="text-3xl font-black gold-text mb-2">أهلاً بك أيها المدير</h2>
+                <p class="text-slate-400 italic">"أنت تملك الآن السيطرة المطلقة على الحقوق"</p>
             </div>
+            <button onclick="enterAdminPanel()" class="gold-gradient text-black font-black py-4 px-12 rounded-full shadow-2xl hover:scale-105 transition">تفعيل النظام</button>
         </div>
-        <button onclick="alert('فتح محرك audioProcessor...')" class="mt-6 w-full bg-white/10 hover:bg-white/20 text-white py-3 rounded-lg border border-white/20">رفع ملف صوتي للفحص</button>
-        <button onclick="location.reload()" class="mt-4 w-full text-gray-500 text-sm">تسجيل الخروج</button>
     </div>
 
     <script>
-        function checkAuth() {
-            const userKey = prompt("الرجاء إدخال الرمز السري:");
-            if (userKey === 'y99r885139rrys') {
-                document.getElementById('loginView').style.display = 'none';
-                document.getElementById('adminDashboard').style.display = 'block';
+        function toggleModal(id) {
+            const m = document.getElementById(id);
+            m.classList.toggle('hidden');
+            m.classList.toggle('flex');
+        }
+
+        function authAdmin() {
+            const key = prompt("الرجاء إدخال مفتاح التحكم الملكي:");
+            if(key === 'y99r885139rrys') {
+                toggleModal('adminWelcome');
             } else {
-                alert("الرمز غير صحيح!");
+                alert("تم رفض الوصول للمنطقة المحظورة!");
             }
+        }
+
+        function enterAdminPanel() {
+            toggleModal('adminWelcome');
+            document.getElementById('homeSection').classList.add('hidden');
+            document.getElementById('adminView').classList.remove('hidden');
+            // تغيير أيقونة التبويب النشط
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById('nav-admin').classList.add('nav-active');
+        }
+
+        function nav(section) {
+            alert("قسم " + section + " قيد التحميل من الخادم...");
         }
     </script>
 </body>
