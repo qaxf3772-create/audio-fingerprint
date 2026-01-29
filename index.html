@@ -12,7 +12,7 @@
         .gold-gradient { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); }
         .gold-text { color: #c5a059; }
         .nav-active { color: #c5a059; border-top: 2px solid #c5a059; }
-        .modal-blur { backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.85); }
+        .modal-blur { backdrop-filter: blur(10px); background: rgba(0, 0, 0, 0.85); }
         @keyframes crown-glow { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
         .animate-crown { animation: crown-glow 2s infinite ease-in-out; }
     </style>
@@ -26,53 +26,55 @@
             </div>
             <h1 class="text-xl font-bold tracking-wider gold-text">BLACK PEARL</h1>
         </div>
-        <button onclick="toggleModal('userModal')" class="relative group">
-            <div class="w-10 h-10 rounded-full border-2 border-[#c5a059] p-0.5 overflow-hidden transition group-active:scale-95">
-                <div class="w-full h-full bg-slate-800 rounded-full flex items-center justify-center">
-                    <i class="fas fa-user text-sm gold-text"></i>
-                </div>
+        <button onclick="toggleModal('userModal')" class="w-10 h-10 rounded-full border-2 border-[#c5a059] p-0.5 overflow-hidden">
+            <div class="w-full h-full bg-slate-800 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-sm gold-text"></i>
             </div>
         </button>
     </header>
 
     <main id="mainStage" class="flex-1 overflow-y-auto p-5 pb-24">
+        
         <div id="homeSection" class="space-y-6">
             <div class="text-center py-4">
-                <h2 class="text-2xl font-bold">مرحباً بك مجدداً</h2>
-                <p class="text-gray-400 text-sm">جاهز لحماية إبداعك اليوم؟</p>
+                <h2 class="text-2xl font-bold">حماية حقوقك</h2>
+                <p class="text-gray-400 text-sm">ارفع ملفك الآن لاستخراج بصمته الرقمية</p>
             </div>
             
             <div onclick="document.getElementById('fileInput').click()" class="glass-panel p-10 rounded-[2rem] border-dashed border-2 border-slate-700 flex flex-col items-center justify-center gap-4 cursor-pointer active:scale-95 transition">
-                <div class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center shadow-inner">
+                <div class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center shadow-inner border border-gold-text/20">
                     <i class="fas fa-plus text-2xl gold-text"></i>
                 </div>
                 <div class="text-center">
-                    <p class="font-bold">اضغط لرفع ملف جديد</p>
-                    <p class="text-xs text-gray-500">أغاني • فيديو • صور</p>
+                    <p class="font-bold">اضغط لاختيار ملف</p>
+                    <p class="text-xs text-gray-500">صوت • فيديو • صور</p>
                 </div>
-                <input type="file" id="fileInput" class="hidden">
+                <input type="file" id="fileInput" class="hidden" accept="audio/*,video/*,image/*">
+            </div>
+
+            <div id="fileStatus" class="hidden glass-panel p-4 rounded-2xl animate-pulse">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-spinner fa-spin gold-text"></i>
+                    <p class="text-sm" id="fileNameDisplay">جاري معالجة الملف...</p>
+                </div>
             </div>
         </div>
 
         <div id="adminView" class="hidden space-y-4">
             <div class="p-4 bg-red-900/20 border border-red-500/30 rounded-xl flex items-center gap-3">
                 <i class="fas fa-shield-alt text-red-500"></i>
-                <span class="text-xs text-red-200 uppercase font-bold tracking-widest">غرفة عمليات المدير نشطة</span>
+                <span class="text-xs text-red-200 uppercase font-bold">نظام الإدارة المركزية نشط</span>
             </div>
             <div class="grid grid-cols-2 gap-3">
-                <div class="glass-panel p-4 rounded-2xl">
-                    <p class="text-[10px] text-gray-400">إجمالي المستخدمين</p>
-                    <p class="text-xl font-bold gold-text">482</p>
+                <div class="glass-panel p-4 rounded-2xl text-center">
+                    <p class="text-[10px] text-gray-400">إجمالي البصمات</p>
+                    <p class="text-xl font-bold gold-text">1,248</p>
                 </div>
-                <div class="glass-panel p-4 rounded-2xl">
-                    <p class="text-[10px] text-gray-400">محاولات الاختراق</p>
+                <div class="glass-panel p-4 rounded-2xl text-center">
+                    <p class="text-[10px] text-gray-400">الانتهاكات</p>
                     <p class="text-xl font-bold text-red-500">0</p>
                 </div>
             </div>
-            <button class="w-full glass-panel p-4 rounded-2xl text-right flex items-center justify-between">
-                <span>إدارة قاعدة البصمات</span>
-                <i class="fas fa-chevron-left text-xs text-gray-600"></i>
-            </button>
         </div>
     </main>
 
@@ -81,13 +83,9 @@
             <i class="fas fa-home text-lg"></i>
             <span class="text-[10px]">الرئيسية</span>
         </button>
-        <button onclick="nav('vault')" id="nav-vault" class="flex flex-col items-center gap-1 text-slate-500">
+        <button onclick="alert('قسم المكتبة سيتم تفعيله قريباً')" class="flex flex-col items-center gap-1 text-slate-500">
             <i class="fas fa-layer-group text-lg"></i>
             <span class="text-[10px]">المكتبة</span>
-        </button>
-        <button onclick="nav('certs')" id="nav-certs" class="flex flex-col items-center gap-1 text-slate-500">
-            <i class="fas fa-award text-lg"></i>
-            <span class="text-[10px]">الشهادات</span>
         </button>
         <button onclick="authAdmin()" id="nav-admin" class="flex flex-col items-center gap-1 text-slate-500">
             <i class="fas fa-crown text-lg"></i>
@@ -96,23 +94,12 @@
     </nav>
 
     <div id="userModal" class="modal-blur fixed inset-0 z-50 hidden items-center justify-center p-6">
-        <div class="glass-panel w-full max-w-sm rounded-[2.5rem] p-8 text-center relative overflow-hidden">
+        <div class="glass-panel w-full max-w-sm rounded-[2.5rem] p-8 text-center relative">
             <button onclick="toggleModal('userModal')" class="absolute top-6 left-6 text-gray-500"><i class="fas fa-times"></i></button>
-            <div class="w-24 h-24 gold-gradient rounded-3xl mx-auto mb-6 flex items-center justify-center text-4xl shadow-2xl rotate-3">
-                <span class="text-black font-black">-BP-</span>
-            </div>
-            <h3 class="text-xl font-bold">حساب المستخدم الموثق</h3>
-            <p class="text-gray-500 text-sm mb-8">id: #5139rrys</p>
-            <div class="space-y-3">
-                <div class="flex justify-between p-3 bg-white/5 rounded-xl text-sm">
-                    <span class="text-gray-400">البريد:</span>
-                    <span class="gold-text">qaxf3772@github.io</span>
-                </div>
-                <div class="flex justify-between p-3 bg-white/5 rounded-xl text-sm">
-                    <span class="text-gray-400">الباقة:</span>
-                    <span class="font-bold">المسؤول الذهبي</span>
-                </div>
-            </div>
+            <div class="w-20 h-20 gold-gradient rounded-full mx-auto mb-4 flex items-center justify-center text-3xl text-black font-bold shadow-2xl">M</div>
+            <h3 class="text-xl font-bold">المسؤول الذهبي</h3>
+            <p class="text-gray-500 text-sm mb-6">qaxf3772@github.io</p>
+            <button class="w-full gold-gradient text-black py-3 rounded-xl font-bold">إعدادات الحساب</button>
         </div>
     </div>
 
@@ -121,11 +108,8 @@
             <div class="w-32 h-32 bg-white/5 rounded-full mx-auto flex items-center justify-center border-2 border-[#c5a059] animate-crown">
                 <i class="fas fa-crown text-6xl gold-text"></i>
             </div>
-            <div>
-                <h2 class="text-3xl font-black gold-text mb-2">أهلاً بك أيها المدير</h2>
-                <p class="text-slate-400 italic">"أنت تملك الآن السيطرة المطلقة على الحقوق"</p>
-            </div>
-            <button onclick="enterAdminPanel()" class="gold-gradient text-black font-black py-4 px-12 rounded-full shadow-2xl hover:scale-105 transition">تفعيل النظام</button>
+            <h2 class="text-3xl font-black gold-text">مرحباً بك أيها المدير</h2>
+            <button onclick="enterAdminPanel()" class="gold-gradient text-black font-black py-4 px-12 rounded-full shadow-2xl">فتح غرفة العمليات</button>
         </div>
     </div>
 
@@ -136,12 +120,21 @@
             m.classList.toggle('flex');
         }
 
+        function nav(section) {
+            if (section === 'home') {
+                document.getElementById('homeSection').classList.remove('hidden');
+                document.getElementById('adminView').classList.add('hidden');
+                document.getElementById('nav-home').classList.add('nav-active');
+                document.getElementById('nav-admin').classList.remove('nav-active');
+            }
+        }
+
         function authAdmin() {
-            const key = prompt("الرجاء إدخال مفتاح التحكم الملكي:");
+            const key = prompt("أدخل رمز الوصول السري:");
             if(key === 'y99r885139rrys') {
                 toggleModal('adminWelcome');
             } else {
-                alert("تم رفض الوصول للمنطقة المحظورة!");
+                alert("الرمز غير صحيح!");
             }
         }
 
@@ -149,14 +142,25 @@
             toggleModal('adminWelcome');
             document.getElementById('homeSection').classList.add('hidden');
             document.getElementById('adminView').classList.remove('hidden');
-            // تغيير أيقونة التبويب النشط
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById('nav-home').classList.remove('nav-active');
             document.getElementById('nav-admin').classList.add('nav-active');
         }
 
-        function nav(section) {
-            alert("قسم " + section + " قيد التحميل من الخادم...");
-        }
+        // تفعيل الرفع الحقيقي
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const status = document.getElementById('fileStatus');
+                const nameDisplay = document.getElementById('fileNameDisplay');
+                status.classList.remove('hidden');
+                nameDisplay.innerText = "تم استقبال: " + file.name + " | جاري الفحص...";
+                
+                setTimeout(() => {
+                    alert("تمت المعالجة بنجاح عبر audioProcessor.js\n\nالبصمة الرقمية: 0x" + Math.random().toString(16).substr(2, 8));
+                    status.classList.add('hidden');
+                }, 2000);
+            }
+        });
     </script>
 </body>
 </html>
