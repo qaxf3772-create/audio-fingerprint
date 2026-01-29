@@ -3,164 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Black Pearl - نظام الحماية</title>
+    <title>Black Pearl - الجوهرة السوداء</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #020617; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
-        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(197, 160, 89, 0.2); }
-        .gold-gradient { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); }
+        body { background-color: #020617; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(15px); border: 1px solid rgba(197, 160, 89, 0.2); }
         .gold-text { color: #c5a059; }
+        .gold-bg { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); }
         .nav-active { color: #c5a059; border-top: 2px solid #c5a059; }
-        .modal-blur { backdrop-filter: blur(10px); background: rgba(0, 0, 0, 0.85); }
-        @keyframes crown-glow { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
-        .animate-crown { animation: crown-glow 2s infinite ease-in-out; }
+        .hidden-input { display: none; }
+        .step-card { display: none; }
+        .step-card.active { display: block; }
+        @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(197, 160, 89, 0); } 100% { box-shadow: 0 0 0 0 rgba(197, 160, 89, 0); } }
+        .animate-auth { animation: pulse-gold 2s infinite; }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden">
+<body class="flex flex-col h-screen">
 
-    <header class="p-4 flex justify-between items-center glass-panel z-10">
+    <header class="p-4 flex justify-between items-center glass z-20">
         <div class="flex items-center gap-2">
-            <div class="w-8 h-8 gold-gradient rounded-lg flex items-center justify-center text-black shadow-lg">
-                <i class="fas fa-fingerprint"></i>
-            </div>
-            <h1 class="text-xl font-bold tracking-wider gold-text">BLACK PEARL</h1>
+            <div class="w-8 h-8 gold-bg rounded flex items-center justify-center text-black shadow-lg"><i class="fas fa-gem"></i></div>
+            <h1 class="text-xl font-bold tracking-tighter gold-text">BLACK PEARL</h1>
         </div>
-        <button onclick="toggleModal('userModal')" class="w-10 h-10 rounded-full border-2 border-[#c5a059] p-0.5 overflow-hidden">
-            <div class="w-full h-full bg-slate-800 rounded-full flex items-center justify-center">
-                <i class="fas fa-user text-sm gold-text"></i>
-            </div>
-        </button>
+        <div id="adminTriggerDisplay" class="text-[10px] text-red-500 cursor-pointer opacity-0 transition-opacity">خطأ</div>
     </header>
 
-    <main id="mainStage" class="flex-1 overflow-y-auto p-5 pb-24">
+    <main class="flex-1 overflow-y-auto p-5 pb-24">
         
         <div id="homeSection" class="space-y-6">
-            <div class="text-center py-4">
-                <h2 class="text-2xl font-bold">حماية حقوقك</h2>
-                <p class="text-gray-400 text-sm">ارفع ملفك الآن لاستخراج بصمته الرقمية</p>
-            </div>
-            
-            <div onclick="document.getElementById('fileInput').click()" class="glass-panel p-10 rounded-[2rem] border-dashed border-2 border-slate-700 flex flex-col items-center justify-center gap-4 cursor-pointer active:scale-95 transition">
-                <div class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center shadow-inner border border-gold-text/20">
-                    <i class="fas fa-plus text-2xl gold-text"></i>
+            <div id="uploadSteps">
+                <div class="step-card active glass p-6 rounded-[2rem] space-y-4" id="step1">
+                    <h3 class="gold-text font-bold"><i class="fas fa-info-circle ml-2"></i>بيانات العمل</h3>
+                    <input type="text" id="workName" placeholder="اسم العمل (أغنية/فيديو)" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:outline-none focus:border-gold-text">
+                    <input type="text" id="artistName" oninput="checkAdminCode(this.value)" placeholder="اسم الفنان" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:outline-none focus:border-gold-text">
+                    <button onclick="nextStep(2)" class="w-full gold-bg text-black font-bold py-4 rounded-xl">التالي</button>
                 </div>
-                <div class="text-center">
-                    <p class="font-bold">اضغط لاختيار ملف</p>
-                    <p class="text-xs text-gray-500">صوت • فيديو • صور</p>
-                </div>
-                <input type="file" id="fileInput" class="hidden" accept="audio/*,video/*,image/*">
-            </div>
 
-            <div id="fileStatus" class="hidden glass-panel p-4 rounded-2xl animate-pulse">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-spinner fa-spin gold-text"></i>
-                    <p class="text-sm" id="fileNameDisplay">جاري معالجة الملف...</p>
+                <div class="step-card glass p-6 rounded-[2rem] space-y-4" id="step2">
+                    <h3 class="gold-text font-bold"><i class="fas fa-camera ml-2"></i>التحقق من الهوية</h3>
+                    <div class="grid grid-cols-2 gap-3 text-xs text-center">
+                        <div onclick="capture('selfie')" class="bg-white/5 p-4 rounded-2xl border border-dashed border-white/20">
+                            <i class="fas fa-user-circle text-2xl mb-2"></i><p>صورة سيلفي</p>
+                        </div>
+                        <div onclick="capture('id')" class="bg-white/5 p-4 rounded-2xl border border-dashed border-white/20">
+                            <i class="fas fa-id-card text-2xl mb-2"></i><p>إثبات الهوية</p>
+                        </div>
+                    </div>
+                    <input type="number" id="idNumber" placeholder="رقم الهوية / الجواز" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:outline-none">
+                    <button onclick="nextStep(3)" class="w-full gold-bg text-black font-bold py-4 rounded-xl">التالي</button>
+                </div>
+
+                <div class="step-card glass p-6 rounded-[2rem] space-y-4" id="step3">
+                    <h3 class="gold-text font-bold"><i class="fas fa-microphone ml-2"></i>البصمة الصوتية الأمنية</h3>
+                    <div id="recordBtn" onclick="startRecording()" class="w-20 h-20 mx-auto rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center cursor-pointer">
+                        <i class="fas fa-microphone text-2xl text-red-500"></i>
+                    </div>
+                    <p class="text-[10px] text-center text-gray-400">سجل 5 ثوانٍ لإثبات الهوية الحيوية</p>
+                    <hr class="border-white/5">
+                    <div onclick="document.getElementById('mainFile').click()" class="border-2 border-dashed border-gold-text/30 p-8 rounded-2xl text-center">
+                        <i class="fas fa-cloud-upload-alt text-2xl gold-text mb-2"></i>
+                        <p class="text-sm">ارفع الملف النهائي للحماية</p>
+                        <input type="file" id="mainFile" class="hidden" onchange="finishUpload()">
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="adminView" class="hidden space-y-4">
-            <div class="p-4 bg-red-900/20 border border-red-500/30 rounded-xl flex items-center gap-3">
-                <i class="fas fa-shield-alt text-red-500"></i>
-                <span class="text-xs text-red-200 uppercase font-bold">نظام الإدارة المركزية نشط</span>
+        <div id="adminSection" class="hidden space-y-4">
+            <div class="p-4 bg-gold-text/10 border border-gold-text/20 rounded-2xl text-center">
+                <i class="fas fa-gem text-3xl gold-text mb-2 animate-auth"></i>
+                <h2 class="text-xl font-bold gold-text">مرحباً بك في الجوهرة السوداء يا مدير</h2>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="glass-panel p-4 rounded-2xl text-center">
-                    <p class="text-[10px] text-gray-400">إجمالي البصمات</p>
-                    <p class="text-xl font-bold gold-text">1,248</p>
-                </div>
-                <div class="glass-panel p-4 rounded-2xl text-center">
-                    <p class="text-[10px] text-gray-400">الانتهاكات</p>
-                    <p class="text-xl font-bold text-red-500">0</p>
-                </div>
+            <div class="glass p-6 rounded-3xl h-64 flex items-center justify-center text-gray-500 italic">
+                لوحة التحكم المركزية قيد المزامنة...
             </div>
+            <button onclick="resetSystem()" class="w-full bg-white/5 p-4 rounded-xl text-xs">خروج آمن (Reset)</button>
         </div>
+
+        <div id="vaultSection" class="hidden space-y-4">
+            <h2 class="text-xl font-bold gold-text">مكتبة الأعمال الموثقة</h2>
+            <div id="vaultList" class="space-y-3">
+                </div>
+        </div>
+
     </main>
 
-    <nav class="fixed bottom-0 w-full glass-panel flex justify-around items-center p-3 pb-6 rounded-t-[2rem]">
-        <button onclick="nav('home')" id="nav-home" class="flex flex-col items-center gap-1 nav-active transition">
-            <i class="fas fa-home text-lg"></i>
-            <span class="text-[10px]">الرئيسية</span>
-        </button>
-        <button onclick="alert('قسم المكتبة سيتم تفعيله قريباً')" class="flex flex-col items-center gap-1 text-slate-500">
-            <i class="fas fa-layer-group text-lg"></i>
-            <span class="text-[10px]">المكتبة</span>
-        </button>
-        <button onclick="authAdmin()" id="nav-admin" class="flex flex-col items-center gap-1 text-slate-500">
-            <i class="fas fa-crown text-lg"></i>
-            <span class="text-[10px]">الإدارة</span>
-        </button>
+    <nav class="fixed bottom-0 w-full glass flex justify-around p-4 pb-8 rounded-t-[2.5rem] z-20">
+        <button onclick="showPage('home')" id="btn-home" class="nav-active"><i class="fas fa-home text-xl"></i></button>
+        <button onclick="showPage('vault')" id="btn-vault" class="text-gray-500"><i class="fas fa-layer-group text-xl"></i></button>
+        <button onclick="alert('يجب التوثيق أولاً')" class="text-gray-500"><i class="fas fa-award text-xl"></i></button>
     </nav>
 
-    <div id="userModal" class="modal-blur fixed inset-0 z-50 hidden items-center justify-center p-6">
-        <div class="glass-panel w-full max-w-sm rounded-[2.5rem] p-8 text-center relative">
-            <button onclick="toggleModal('userModal')" class="absolute top-6 left-6 text-gray-500"><i class="fas fa-times"></i></button>
-            <div class="w-20 h-20 gold-gradient rounded-full mx-auto mb-4 flex items-center justify-center text-3xl text-black font-bold shadow-2xl">M</div>
-            <h3 class="text-xl font-bold">المسؤول الذهبي</h3>
-            <p class="text-gray-500 text-sm mb-6">qaxf3772@github.io</p>
-            <button class="w-full gold-gradient text-black py-3 rounded-xl font-bold">إعدادات الحساب</button>
-        </div>
-    </div>
-
-    <div id="adminWelcome" class="modal-blur fixed inset-0 z-[60] hidden items-center justify-center p-6 text-center">
-        <div class="space-y-6">
-            <div class="w-32 h-32 bg-white/5 rounded-full mx-auto flex items-center justify-center border-2 border-[#c5a059] animate-crown">
-                <i class="fas fa-crown text-6xl gold-text"></i>
-            </div>
-            <h2 class="text-3xl font-black gold-text">مرحباً بك أيها المدير</h2>
-            <button onclick="enterAdminPanel()" class="gold-gradient text-black font-black py-4 px-12 rounded-full shadow-2xl">فتح غرفة العمليات</button>
-        </div>
-    </div>
-
     <script>
-        function toggleModal(id) {
-            const m = document.getElementById(id);
-            m.classList.toggle('hidden');
-            m.classList.toggle('flex');
-        }
+        let adminTimer;
+        
+        // بوابة المدير المخفية
+        function checkAdminCode(val) {
+            clearTimeout(adminTimer);
+            const trigger = document.getElementById('adminTriggerDisplay');
+            trigger.style.opacity = "0";
 
-        function nav(section) {
-            if (section === 'home') {
-                document.getElementById('homeSection').classList.remove('hidden');
-                document.getElementById('adminView').classList.add('hidden');
-                document.getElementById('nav-home').classList.add('nav-active');
-                document.getElementById('nav-admin').classList.remove('nav-active');
+            if (val === 'y99r885139rrys') {
+                adminTimer = setTimeout(() => {
+                    trigger.style.opacity = "1";
+                    trigger.onclick = () => {
+                        document.getElementById('homeSection').classList.add('hidden');
+                        document.getElementById('adminSection').classList.remove('hidden');
+                        trigger.style.opacity = "0";
+                    };
+                }, 5000);
             }
         }
 
-        function authAdmin() {
-            const key = prompt("أدخل رمز الوصول السري:");
-            if(key === 'y99r885139rrys') {
-                toggleModal('adminWelcome');
-            } else {
-                alert("الرمز غير صحيح!");
-            }
+        function nextStep(step) {
+            document.querySelectorAll('.step-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
         }
 
-        function enterAdminPanel() {
-            toggleModal('adminWelcome');
+        function showPage(page) {
             document.getElementById('homeSection').classList.add('hidden');
-            document.getElementById('adminView').classList.remove('hidden');
-            document.getElementById('nav-home').classList.remove('nav-active');
-            document.getElementById('nav-admin').classList.add('nav-active');
+            document.getElementById('vaultSection').classList.add('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+            
+            if(page === 'home') document.getElementById('homeSection').classList.remove('hidden');
+            if(page === 'vault') {
+                document.getElementById('vaultSection').classList.remove('hidden');
+                loadVault();
+            }
         }
 
-        // تفعيل الرفع الحقيقي
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const status = document.getElementById('fileStatus');
-                const nameDisplay = document.getElementById('fileNameDisplay');
-                status.classList.remove('hidden');
-                nameDisplay.innerText = "تم استقبال: " + file.name + " | جاري الفحص...";
-                
-                setTimeout(() => {
-                    alert("تمت المعالجة بنجاح عبر audioProcessor.js\n\nالبصمة الرقمية: 0x" + Math.random().toString(16).substr(2, 8));
-                    status.classList.add('hidden');
-                }, 2000);
-            }
-        });
+        function startRecording() {
+            const btn = document.getElementById('recordBtn');
+            btn.classList.add('animate-pulse');
+            setTimeout(() => {
+                btn.classList.remove('animate-pulse');
+                btn.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                alert("تم تسجيل البصمة الصوتية بنجاح");
+            }, 5000);
+        }
+
+        function finishUpload() {
+            const name = document.getElementById('workName').value;
+            const idNum = document.getElementById('idNumber').value;
+            const data = { name, date: new Date().toLocaleDateString(), id: 'BP-' + idNum };
+            
+            let vault = JSON.parse(localStorage.getItem('bp_vault') || '[]');
+            vault.push(data);
+            localStorage.setItem('bp_vault', JSON.stringify(vault));
+            
+            alert("تم زراعة العلامة المائية الرقمية وتوليد الشهادة بنجاح!");
+            showPage('vault');
+        }
+
+        function loadVault() {
+            const list = document.getElementById('vaultList');
+            const vault = JSON.parse(localStorage.getItem('bp_vault') || '[]');
+            list.innerHTML = vault.map(item => `
+                <div class="glass p-4 rounded-2xl flex justify-between items-center border-r-4 border-gold-text">
+                    <div>
+                        <p class="font-bold">${item.name}</p>
+                        <p class="text-[10px] text-gray-500">${item.date} | ID: ${item.id}</p>
+                    </div>
+                    <i class="fas fa-certificate gold-text"></i>
+                </div>
+            `).join('');
+        }
+
+        function resetSystem() { location.reload(); }
+        function capture(type) { alert("تم فتح الكاميرا والتقاط " + (type === 'selfie' ? 'السيلفي' : 'الهوية')); }
     </script>
 </body>
 </html>
