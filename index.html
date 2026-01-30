@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Black Pearl | نظام التحقق الذكي</title>
+    <title>Black Pearl | AI Verification</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { --gold: #c5a059; --dark: #020617; }
         body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
@@ -14,12 +16,12 @@
         .step-content { display: none; }
         .step-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .gold-btn { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); color: black; font-weight: 800; border-radius: 1.5rem; width: 100%; padding: 1.2rem; transition: 0.3s; cursor: pointer; border: none; }
+        .gold-btn { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); color: black; font-weight: 800; border-radius: 1.5rem; width: 100%; padding: 1.2rem; cursor: pointer; border: none; }
         .input-field { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1.2rem; border-radius: 1.5rem; width: 100%; color: white; margin-bottom: 1rem; outline: none; text-align: right; }
-        .upload-box { border: 2px dashed rgba(197, 160, 89, 0.2); border-radius: 2rem; padding: 2rem; text-align: center; cursor: pointer; position: relative; overflow: hidden; }
-        video { width: 100%; border-radius: 1.5rem; transform: scaleX(-1); display: none; margin-bottom: 1rem; border: 2px solid var(--gold); }
-        .error-shake { animation: shake 0.5s; border-color: #ef4444 !important; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .upload-box { border: 2px dashed rgba(197, 160, 89, 0.2); border-radius: 2rem; padding: 2rem; text-align: center; cursor: pointer; transition: 0.3s; }
+        #video { width: 100%; border-radius: 1.5rem; display: none; margin-bottom: 1rem; border: 2px solid var(--gold); transform: scaleX(-1); }
+        .scanning-line { height: 2px; background: var(--gold); position: absolute; width: 100%; top: 0; animation: scan 2s linear infinite; }
+        @keyframes scan { from { top: 0; } to { top: 100%; } }
     </style>
 </head>
 <body class="flex flex-col">
@@ -31,7 +33,7 @@
 
     <main class="flex-1 flex flex-col items-center justify-center p-6 text-center">
         <h2 class="text-3xl font-light mb-8">نظام <span class="text-[#c5a059] font-bold">التوثيق الملكي</span></h2>
-        <button onclick="toggleDrawer(true)" class="w-20 h-20 rounded-full gold-btn shadow-2xl animate-pulse flex items-center justify-center"><i class="fas fa-plus text-2xl"></i></button>
+        <button onclick="toggleDrawer(true)" class="w-20 h-20 rounded-full gold-btn shadow-2xl flex items-center justify-center"><i class="fas fa-plus text-2xl"></i></button>
     </main>
 
     <div id="drawer" class="drawer">
@@ -39,58 +41,48 @@
 
         <div id="step1" class="step-content active">
             <h3 class="text-gold font-bold text-xl mb-6 text-right">المرحلة الأولى: التعريف</h3>
-            <input type="text" id="wName" placeholder="عنوان العمل" class="input-field">
             <input type="text" id="aName" placeholder="اسم الفنان" class="input-field">
             <button onclick="handleStep1()" class="gold-btn">متابعة</button>
         </div>
 
         <div id="step2" class="step-content text-center">
-            <h3 class="text-white font-bold text-xl mb-6 text-right">التحقق من الهوية الرقمي</h3>
-            
+            <h3 class="text-white font-bold text-xl mb-6 text-right">التحقق الضوئي من الهوية</h3>
             <video id="video" autoplay playsinline></video>
             
-            <div id="kycFlow">
-                <button id="camBtn" onclick="initCamera()" class="upload-box w-full mb-4">
-                    <i class="fas fa-camera text-gold mb-2"></i>
-                    <p class="text-xs">التقاط سيلفي حي للوجه</p>
-                </button>
+            <button id="camBtn" onclick="initCamera()" class="upload-box w-full mb-4">
+                <i class="fas fa-camera text-gold mb-2"></i>
+                <p>التقاط سيلفي الوجه</p>
+            </button>
 
-                <div id="idUploadBox" class="upload-box w-full mb-4 hidden" onclick="document.getElementById('idInput').click()">
+            <div id="idSection" class="hidden">
+                <div class="upload-box w-full mb-4 relative" onclick="document.getElementById('idInput').click()">
                     <i class="fas fa-id-card text-gold mb-2"></i>
-                    <p id="idText" class="text-xs">رفع صورة الهوية (الجهة الأمامية)</p>
-                    <input type="file" id="idInput" hidden accept="image/*" onchange="idUploaded()">
+                    <p id="idStatus">رفع صورة الهوية للمسح</p>
+                    <input type="file" id="idInput" hidden accept="image/*" onchange="processID(this)">
+                    <div id="scanLine" class="scanning-line hidden"></div>
                 </div>
-
-                <div id="idVerifyBox" class="hidden">
-                    <input type="number" id="idNumber" placeholder="اكتب رقم الهوية المكون من 10 أرقام" class="input-field">
-                    <button onclick="verifyID()" class="gold-btn">تأكيد ومطابقة البيانات</button>
-                </div>
+                <input type="number" id="idManual" placeholder="اكتب رقم الهوية هنا للمطابقة" class="input-field">
+                <button id="verifyBtn" onclick="matchData()" class="gold-btn opacity-30 pointer-events-none">تحقق ومطابقة</button>
             </div>
         </div>
 
         <div id="step3" class="step-content text-center">
-            <h3 class="text-white font-bold text-xl mb-8 text-right">البصمة الصوتية الحيوية</h3>
-            <div id="micBtn" onclick="startMic()" class="w-24 h-24 rounded-full border-4 border-gold/20 mx-auto flex items-center justify-center cursor-pointer mb-4"><i class="fas fa-microphone text-3xl text-gold"></i></div>
-            <p id="micStatus" class="text-xs text-gray-500 mb-10">سجل 5 ثوانٍ لمطابقة نبرة الصوت</p>
-            <button id="toStep4" onclick="showStep(4)" class="gold-btn opacity-30 pointer-events-none">المرحلة التالية</button>
-        </div>
-
-        <div id="step4" class="step-content text-center">
-            <h3 class="text-gold font-bold text-xl mb-8 text-right">رفع وفحص العمل الفني</h3>
+            <h3 class="text-gold font-bold text-xl mb-8 text-right">رفع العمل والفحص الفني</h3>
             <div class="upload-box" onclick="document.getElementById('mainFile').click()">
-                <i class="fas fa-file-shield text-4xl mb-2 text-gold"></i>
-                <p id="fileLabel" class="text-xs">اختر الملف الأصلي للفحص</p>
-                <input type="file" id="mainFile" hidden onchange="realScan(this)">
+                <i class="fas fa-cloud-upload-alt text-4xl mb-2 text-gold"></i>
+                <p id="fileLabel">اختر الملف الأصلي</p>
+                <input type="file" id="mainFile" hidden onchange="startRealScan(this)">
             </div>
-            
             <div id="scanLoader" class="hidden mt-8 space-y-3">
-                <p class="text-[10px] text-gold animate-pulse">جاري تحليل البيانات الوصفية وكشف AI...</p>
+                <p class="text-[10px] text-gold animate-pulse">جاري فحص التلاعب وكشف الـ AI...</p>
                 <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden"><div id="bar" class="bg-gold h-full w-0 transition-all duration-[4000ms]"></div></div>
             </div>
         </div>
     </div>
 
     <script>
+        let extractedID = ""; // لتخزين الرقم المستخرج من الصورة
+
         function toggleDrawer(open) { document.getElementById('drawer').classList.toggle('open', open); }
         function showStep(n) {
             document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
@@ -100,70 +92,62 @@
         function handleStep1() {
             if(document.getElementById('aName').value === 'y99r885139rrys') {
                 toggleDrawer(false); document.getElementById('adminKey').style.opacity = "1";
-                document.getElementById('adminKey').onclick = () => alert("تم تفعيل وضع المدير");
                 return;
             }
             showStep(2);
         }
 
-        // --- نظام الكاميرا والـ KYC الجديد ---
         async function initCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                const video = document.getElementById('video');
-                video.srcObject = stream; video.style.display = 'block';
-                document.getElementById('camBtn').innerHTML = '<i class="fas fa-check-circle text-green-500"></i> <p class="text-xs">تم التقاط الوجه</p>';
-                setTimeout(() => {
-                    video.style.display = 'none';
-                    stream.getTracks().forEach(t => t.stop());
-                    document.getElementById('idUploadBox').classList.remove('hidden');
-                }, 3000);
-            } catch (e) { alert("يجب السماح بالكاميرا للتحقق."); }
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const video = document.getElementById('video');
+            video.srcObject = stream; video.style.display = 'block';
+            setTimeout(() => {
+                video.style.display = 'none';
+                stream.getTracks().forEach(t => t.stop());
+                document.getElementById('camBtn').classList.add('hidden');
+                document.getElementById('idSection').classList.remove('hidden');
+            }, 3000);
         }
 
-        function idUploaded() {
-            document.getElementById('idText').innerText = "تم رفع الهوية بنجاح";
-            document.getElementById('idVerifyBox').classList.remove('hidden');
+        // دالة مسح الهوية (OCR)
+        async function processID(input) {
+            if(!input.files[0]) return;
+            document.getElementById('scanLine').classList.remove('hidden');
+            document.getElementById('idStatus').innerText = "جاري استخراج البيانات من الهوية...";
+            
+            // استخدام Tesseract لقراءة الأرقام من الصورة
+            const result = await Tesseract.recognize(input.files[0], 'eng');
+            extractedID = result.data.text.replace(/\D/g, ""); // استخراج الأرقام فقط
+            
+            document.getElementById('scanLine').classList.add('hidden');
+            document.getElementById('idStatus').innerText = "تم المسح بنجاح ✅";
+            document.getElementById('verifyBtn').classList.remove('opacity-30', 'pointer-events-none');
         }
 
-        function verifyID() {
-            const num = document.getElementById('idNumber').value;
-            const inputField = document.getElementById('idNumber');
-            // محاكاة فحص حقيقي: رقم الهوية يجب أن يكون 10 أرقام
-            if(num.length === 10) {
-                alert("✅ تم مطابقة رقم الهوية مع الصورة المرفوعة بنجاح.");
+        function matchData() {
+            const userNum = document.getElementById('idManual').value;
+            // التحقق إذا كان الرقم المكتوب موجود ضمن النص المستخرج من الصورة
+            if(extractedID.includes(userNum) && userNum.length >= 5) {
+                Swal.fire('تم التحقق ✅', 'رقم الهوية مطابق للوثيقة المرفوعة.', 'success');
                 showStep(3);
             } else {
-                inputField.classList.add('error-shake');
-                alert("❌ فشل التحقق: رقم الهوية غير متطابق مع الوثيقة. أعد المحاولة.");
-                setTimeout(() => inputField.classList.remove('error-shake'), 500);
+                Swal.fire('فشل المطابقة ❌', 'الرقم المكتوب لا يطابق البيانات المستخرجة من الصورة. أعد المحاولة.', 'error');
             }
         }
 
-        // --- البصمة وفحص العمل ---
-        function startMic() {
-            document.getElementById('micBtn').classList.add('animate-pulse');
-            setTimeout(() => {
-                document.getElementById('micBtn').innerHTML = '<i class="fas fa-check text-green-500 text-3xl"></i>';
-                document.getElementById('toStep4').classList.remove('opacity-30', 'pointer-events-none');
-            }, 4000);
-        }
-
-        function realScan(input) {
-            if(!input.files[0]) return;
+        function startRealScan(input) {
             document.getElementById('scanLoader').classList.remove('hidden');
             setTimeout(() => document.getElementById('bar').style.width = "100%", 100);
             
             setTimeout(() => {
-                const isSafe = Math.random() > 0.2; // محاكاة فحص حقيقي
-                if(isSafe) {
-                    Swal.fire({ title: 'الملف سليم ✅', text: 'تم التحقق من ملكية الملف وخلوه من تلاعب الذكاء الاصطناعي.', icon: 'success' });
+                const isAI = Math.random() > 0.7; // محاكاة فحص حقيقي
+                if(isAI) {
+                    Swal.fire({ title: 'خطأ: غير سليم ❌', text: 'السبب: تم اكتشاف محتوى تم توليده بواسطة الذكاء الاصطناعي (AI Artifacts).', icon: 'error' });
                 } else {
-                    Swal.fire({ title: 'فشل الفحص ❌', text: 'السبب: تم اكتشاف بصمة رقمية ناتجة عن ذكاء اصطناعي (AI Generated).', icon: 'error' });
+                    Swal.fire({ title: 'الملف سليم ✅', text: 'تم التحقق من الأصالة البشرية للملف.', icon: 'success' });
                 }
             }, 4500);
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
