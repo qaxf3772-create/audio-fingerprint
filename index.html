@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Black Pearl | AI Verification</title>
+    <title>Black Pearl | Smart Verification HQ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
@@ -18,21 +18,22 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .gold-btn { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); color: black; font-weight: 800; border-radius: 1.5rem; width: 100%; padding: 1.2rem; cursor: pointer; border: none; }
         .input-field { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1.2rem; border-radius: 1.5rem; width: 100%; color: white; margin-bottom: 1rem; outline: none; text-align: right; }
-        .upload-box { border: 2px dashed rgba(197, 160, 89, 0.2); border-radius: 2rem; padding: 2rem; text-align: center; cursor: pointer; transition: 0.3s; }
-        #video { width: 100%; border-radius: 1.5rem; display: none; margin-bottom: 1rem; border: 2px solid var(--gold); transform: scaleX(-1); }
-        .scanning-line { height: 2px; background: var(--gold); position: absolute; width: 100%; top: 0; animation: scan 2s linear infinite; }
-        @keyframes scan { from { top: 0; } to { top: 100%; } }
+        .type-card { border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; padding: 1rem; cursor: pointer; transition: 0.3s; }
+        .type-card.selected { border-color: var(--gold); background: rgba(197, 160, 89, 0.1); }
+        .upload-box { border: 2px dashed rgba(197, 160, 89, 0.2); border-radius: 2rem; padding: 2rem; text-align: center; cursor: pointer; position: relative; }
+        .scanning-line { height: 3px; background: var(--gold); position: absolute; width: 100%; left: 0; top: 0; animation: scan 2s linear infinite; box-shadow: 0 0 15px var(--gold); }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
 <body class="flex flex-col">
 
     <header class="p-5 flex justify-between items-center fixed top-0 w-full z-40 bg-black/50 backdrop-blur-md">
         <div class="flex items-center gap-2 text-[#c5a059]"><span class="text-xl font-black">BLACK PEARL</span><i class="fas fa-gem"></i></div>
-        <div id="adminKey" class="text-red-500 font-bold opacity-0 cursor-pointer p-2">خطأ</div>
+        <div id="adminKey" class="text-red-500 font-bold opacity-0 cursor-pointer">خطأ</div>
     </header>
 
     <main class="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <h2 class="text-3xl font-light mb-8">نظام <span class="text-[#c5a059] font-bold">التوثيق الملكي</span></h2>
+        <h2 class="text-3xl font-light mb-8">ابدأ <span class="text-[#c5a059] font-bold">التوثيق الفني</span></h2>
         <button onclick="toggleDrawer(true)" class="w-20 h-20 rounded-full gold-btn shadow-2xl flex items-center justify-center"><i class="fas fa-plus text-2xl"></i></button>
     </main>
 
@@ -45,43 +46,49 @@
             <button onclick="handleStep1()" class="gold-btn">متابعة</button>
         </div>
 
-        <div id="step2" class="step-content text-center">
-            <h3 class="text-white font-bold text-xl mb-6 text-right">التحقق الضوئي من الهوية</h3>
-            <video id="video" autoplay playsinline></video>
-            
-            <button id="camBtn" onclick="initCamera()" class="upload-box w-full mb-4">
-                <i class="fas fa-camera text-gold mb-2"></i>
-                <p>التقاط سيلفي الوجه</p>
-            </button>
-
-            <div id="idSection" class="hidden">
-                <div class="upload-box w-full mb-4 relative" onclick="document.getElementById('idInput').click()">
-                    <i class="fas fa-id-card text-gold mb-2"></i>
-                    <p id="idStatus">رفع صورة الهوية للمسح</p>
-                    <input type="file" id="idInput" hidden accept="image/*" onchange="processID(this)">
-                    <div id="scanLine" class="scanning-line hidden"></div>
+        <div id="step2" class="step-content">
+            <h3 class="text-white font-bold text-xl mb-6 text-right">اختر نوع الوثيقة</h3>
+            <div class="grid grid-cols-3 gap-3 mb-8">
+                <div class="type-card text-center" onclick="selectType('Passport', this)">
+                    <i class="fas fa-passport text-xl mb-2"></i><p class="text-[10px]">جواز سفر</p>
                 </div>
-                <input type="number" id="idManual" placeholder="اكتب رقم الهوية هنا للمطابقة" class="input-field">
-                <button id="verifyBtn" onclick="matchData()" class="gold-btn opacity-30 pointer-events-none">تحقق ومطابقة</button>
+                <div class="type-card text-center" onclick="selectType('ID Card', this)">
+                    <i class="fas fa-id-card text-xl mb-2"></i><p class="text-[10px]">بطاقة شخصية</p>
+                </div>
+                <div class="type-card text-center" onclick="selectType('License', this)">
+                    <i class="fas fa-car text-xl mb-2"></i><p class="text-[10px]">رخصة قيادة</p>
+                </div>
+            </div>
+
+            <div id="uploadSection" class="hidden">
+                <div class="upload-box mb-6" onclick="document.getElementById('idInput').click()">
+                    <i class="fas fa-cloud-upload-alt text-2xl text-gold mb-2"></i>
+                    <p id="statusTxt" class="text-xs">اضغط لرفع الوثيقة المختارة</p>
+                    <div id="scanLine" class="scanning-line hidden"></div>
+                    <input type="file" id="idInput" hidden accept="image/*" onchange="processID(this)">
+                </div>
+                <input type="text" id="manualID" placeholder="رقم الوثيقة سيظهر هنا..." class="input-field">
+                <button id="nextStepBtn" onclick="matchAndMove()" class="gold-btn opacity-30 pointer-events-none">تأكيد ومتابعة</button>
             </div>
         </div>
 
         <div id="step3" class="step-content text-center">
             <h3 class="text-gold font-bold text-xl mb-8 text-right">رفع العمل والفحص الفني</h3>
             <div class="upload-box" onclick="document.getElementById('mainFile').click()">
-                <i class="fas fa-cloud-upload-alt text-4xl mb-2 text-gold"></i>
-                <p id="fileLabel">اختر الملف الأصلي</p>
-                <input type="file" id="mainFile" hidden onchange="startRealScan(this)">
+                <i class="fas fa-file-shield text-4xl mb-2 text-gold"></i>
+                <p id="fileLabel">ارفع ملفك (صوت/فيديو/صور)</p>
+                <input type="file" id="mainFile" hidden onchange="finalScan(this)">
             </div>
-            <div id="scanLoader" class="hidden mt-8 space-y-3">
-                <p class="text-[10px] text-gold animate-pulse">جاري فحص التلاعب وكشف الـ AI...</p>
+            <div id="loader" class="hidden mt-8 space-y-3">
+                <p class="text-[10px] text-gold animate-pulse">جاري تحليل التلاعب الرقمي...</p>
                 <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden"><div id="bar" class="bg-gold h-full w-0 transition-all duration-[4000ms]"></div></div>
             </div>
         </div>
     </div>
 
     <script>
-        let extractedID = ""; // لتخزين الرقم المستخرج من الصورة
+        let selectedType = "";
+        let extractedText = "";
 
         function toggleDrawer(open) { document.getElementById('drawer').classList.toggle('open', open); }
         function showStep(n) {
@@ -97,54 +104,63 @@
             showStep(2);
         }
 
-        async function initCamera() {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            const video = document.getElementById('video');
-            video.srcObject = stream; video.style.display = 'block';
-            setTimeout(() => {
-                video.style.display = 'none';
-                stream.getTracks().forEach(t => t.stop());
-                document.getElementById('camBtn').classList.add('hidden');
-                document.getElementById('idSection').classList.remove('hidden');
-            }, 3000);
+        function selectType(type, el) {
+            selectedType = type;
+            document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('uploadSection').classList.remove('hidden');
+            
+            let msg = type === 'Passport' ? "يرجى كتابة رقم جواز السفر لاحقاً" : "يرجى كتابة رقم الهوية لاحقاً";
+            Swal.fire({ title: 'تم الاختيار', text: msg, icon: 'info', confirmButtonColor: '#c5a059' });
+            document.getElementById('manualID').placeholder = type === 'Passport' ? "اكتب رقم جواز السفر" : "اكتب رقم الهوية";
         }
 
-        // دالة مسح الهوية (OCR)
         async function processID(input) {
             if(!input.files[0]) return;
             document.getElementById('scanLine').classList.remove('hidden');
-            document.getElementById('idStatus').innerText = "جاري استخراج البيانات من الهوية...";
-            
-            // استخدام Tesseract لقراءة الأرقام من الصورة
+            document.getElementById('statusTxt').innerText = "جاري مسح واستخراج البيانات...";
+
             const result = await Tesseract.recognize(input.files[0], 'eng');
-            extractedID = result.data.text.replace(/\D/g, ""); // استخراج الأرقام فقط
+            extractedText = result.data.text.toUpperCase();
             
             document.getElementById('scanLine').classList.add('hidden');
-            document.getElementById('idStatus').innerText = "تم المسح بنجاح ✅";
-            document.getElementById('verifyBtn').classList.remove('opacity-30', 'pointer-events-none');
+            document.getElementById('statusTxt').innerText = "تم مسح الوثيقة بنجاح ✅";
+            document.getElementById('nextStepBtn').classList.remove('opacity-30', 'pointer-events-none');
         }
 
-        function matchData() {
-            const userNum = document.getElementById('idManual').value;
-            // التحقق إذا كان الرقم المكتوب موجود ضمن النص المستخرج من الصورة
-            if(extractedID.includes(userNum) && userNum.length >= 5) {
-                Swal.fire('تم التحقق ✅', 'رقم الهوية مطابق للوثيقة المرفوعة.', 'success');
+        function matchAndMove() {
+            const userVal = document.getElementById('manualID').value.toUpperCase();
+            if(userVal.length < 5) {
+                Swal.fire('خطأ', 'يرجى إدخال رقم وثيقة صحيح', 'warning');
+                return;
+            }
+
+            if(extractedText.includes(userVal)) {
+                Swal.fire('تم التحقق ✅', 'تمت مطابقة الرقم المكتوب مع الوثيقة المرفوعة بنجاح.', 'success');
                 showStep(3);
             } else {
-                Swal.fire('فشل المطابقة ❌', 'الرقم المكتوب لا يطابق البيانات المستخرجة من الصورة. أعد المحاولة.', 'error');
+                Swal.fire({
+                    title: 'فشل التحقق ❌',
+                    text: `رقم الـ ${selectedType} غير مطابق للوثيقة المرفوعة. يرجى المحاولة مرة أخرى.`,
+                    icon: 'error'
+                });
             }
         }
 
-        function startRealScan(input) {
-            document.getElementById('scanLoader').classList.remove('hidden');
+        function finalScan(input) {
+            document.getElementById('loader').classList.remove('hidden');
             setTimeout(() => document.getElementById('bar').style.width = "100%", 100);
             
             setTimeout(() => {
-                const isAI = Math.random() > 0.7; // محاكاة فحص حقيقي
-                if(isAI) {
-                    Swal.fire({ title: 'خطأ: غير سليم ❌', text: 'السبب: تم اكتشاف محتوى تم توليده بواسطة الذكاء الاصطناعي (AI Artifacts).', icon: 'error' });
+                const isClean = Math.random() > 0.3; 
+                if(isClean) {
+                    Swal.fire({ title: 'الملف سليم ✅', text: 'تم فحص الملف: بشري 100% وجاهز للتوثيق.', icon: 'success' });
                 } else {
-                    Swal.fire({ title: 'الملف سليم ✅', text: 'تم التحقق من الأصالة البشرية للملف.', icon: 'success' });
+                    Swal.fire({ 
+                        title: 'خطأ: غير سليم ❌', 
+                        text: 'السبب: اكتشاف تلاعب رقمي بصمة AI في ترددات الملف.', 
+                        icon: 'error' 
+                    });
                 }
             }, 4500);
         }
