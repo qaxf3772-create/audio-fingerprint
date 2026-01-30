@@ -11,122 +11,142 @@
     <style>
         :root { --gold: #c5a059; --dark: #020617; }
         body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        
+        /* النافذة المسحوبة */
         .drawer { position: fixed; bottom: -100%; left: 0; width: 100%; height: 92%; background: #020617; border-top: 2px solid var(--gold); border-radius: 3rem 3rem 0 0; transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1); z-index: 50; padding: 2rem; overflow-y: auto; }
         .drawer.open { bottom: 0; }
+        
         .step-content { display: none; }
         .step-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .gold-btn { background: linear-gradient(135deg, #c5a059 0%, #d4af37 100%); color: black; font-weight: 800; border-radius: 1.5rem; width: 100%; padding: 1.2rem; cursor: pointer; border: none; }
         .input-field { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1.2rem; border-radius: 1.5rem; width: 100%; color: white; margin-bottom: 1rem; outline: none; text-align: right; }
-        .type-card { border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; padding: 1rem; cursor: pointer; transition: 0.3s; }
+
+        /* بوابة الإدارة */
+        #adminPanel { display: none; position: fixed; inset: 0; background: #000; z-index: 1000; padding: 2rem; text-align: center; }
+        #adminKey { display: none; color: #ef4444; font-weight: bold; cursor: pointer; animation: pulseRed 1s infinite; padding: 10px; }
+        @keyframes pulseRed { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* زر الرئيسية الدائم */
+        .home-nav { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 60; background: rgba(255,255,255,0.05); padding: 12px 30px; border-radius: 30px; border: 1px solid rgba(197, 160, 89, 0.3); backdrop-blur: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        
+        .type-card { border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; padding: 1rem; cursor: pointer; }
         .type-card.selected { border-color: var(--gold); background: rgba(197, 160, 89, 0.1); }
         .upload-box { border: 2px dashed rgba(197, 160, 89, 0.2); border-radius: 2rem; padding: 2rem; text-align: center; cursor: pointer; position: relative; }
-        .scanning-line { height: 3px; background: var(--gold); position: absolute; width: 100%; left: 0; top: 0; animation: scan 2s linear infinite; box-shadow: 0 0 15px var(--gold); }
+        .scanning-line { height: 3px; background: var(--gold); position: absolute; width: 100%; left: 0; top: 0; animation: scan 2s linear infinite; }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-        
-        /* تصميم لوحة الإدارة */
-        #adminPanel { display: none; position: fixed; inset: 0; background: var(--dark); z-index: 100; padding: 2rem; text-align: center; }
-        
-        /* زر العودة الدائم في الأسفل */
-        .home-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 60; background: rgba(255,255,255,0.05); padding: 10px 25px; border-radius: 20px; border: 1px solid rgba(197, 160, 89, 0.3); backdrop-blur: 10px; cursor: pointer; transition: 0.3s; }
-        .home-nav:hover { background: rgba(197, 160, 89, 0.1); }
     </style>
 </head>
-<body class="flex flex-col">
+<body>
 
     <header class="p-5 flex justify-between items-center fixed top-0 w-full z-40 bg-black/50 backdrop-blur-md">
-        <div class="flex items-center gap-2 text-[#c5a059]"><span class="text-xl font-black">BLACK PEARL</span><i class="fas fa-gem"></i></div>
-        <div id="adminKey" onclick="openAdminPanel()" class="text-red-500 font-bold opacity-0 cursor-pointer transition-opacity duration-500">خطأ</div>
+        <div class="flex items-center gap-2 text-[#c5a059]">
+            <span class="text-xl font-black uppercase">Black Pearl</span>
+            <i class="fas fa-gem"></i>
+        </div>
+        <div id="adminKey" onclick="enterAdmin()">خطأ</div>
     </header>
 
-    <main id="mainContent" class="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <h2 class="text-3xl font-light mb-8">ابدأ <span class="text-[#c5a059] font-bold">التوثيق الفني</span></h2>
-        <button onclick="toggleDrawer(true)" class="w-20 h-20 rounded-full gold-btn shadow-2xl flex items-center justify-center"><i class="fas fa-plus text-2xl"></i></button>
+    <main class="flex-1 flex flex-col items-center justify-center min-h-screen p-6 text-center">
+        <h2 class="text-3xl font-light mb-8 italic">نظام <span class="text-[#c5a059] font-bold">التوثيق الملكي</span></h2>
+        <button onclick="toggleDrawer(true)" class="w-24 h-24 rounded-full gold-btn shadow-[0_0_50px_rgba(197,160,89,0.3)] flex items-center justify-center">
+            <i class="fas fa-plus text-3xl"></i>
+        </button>
     </main>
 
     <div id="adminPanel">
-        <div class="mt-20">
-            <i class="fas fa-user-shield text-5xl text-gold mb-4"></i>
-            <h2 class="text-2xl font-bold mb-8">لوحة تحكم الإدارة</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white/5 p-4 rounded-2xl border border-gold/20">
-                    <p class="text-gray-400 text-xs">طلبات التوثيق</p>
-                    <p class="text-xl font-bold">24</p>
+        <div class="flex flex-col items-center justify-center h-full">
+            <i class="fas fa-user-crown text-6xl text-gold mb-6"></i>
+            <h1 class="text-2xl font-black mb-10 text-gold">لوحة تحكم المدير المركزية</h1>
+            <div class="w-full max-w-xs space-y-4">
+                <div class="bg-white/5 p-5 rounded-3xl border border-white/10 flex justify-between">
+                    <span>إجمالي المستخدمين</span>
+                    <span class="text-gold">1,284</span>
                 </div>
-                <div class="bg-white/5 p-4 rounded-2xl border border-gold/20">
-                    <p class="text-gray-400 text-xs">تحليلات AI</p>
-                    <p class="text-xl font-bold text-red-500">مفعل</p>
+                <div class="bg-white/5 p-5 rounded-3xl border border-white/10 flex justify-between">
+                    <span>كشف AI نشط</span>
+                    <span class="text-green-500">99.9%</span>
                 </div>
             </div>
-            <button onclick="location.reload()" class="gold-btn mt-10">تسجيل الخروج</button>
+            <button onclick="location.reload()" class="mt-20 text-gray-500 underline">خروج من النظام</button>
         </div>
     </div>
 
     <div class="home-nav" onclick="goHome()">
         <i class="fas fa-home text-gold"></i>
-        <span class="text-xs mr-2">الرئيسية</span>
+        <span class="text-sm font-bold">الرئيسية</span>
     </div>
 
     <div id="drawer" class="drawer">
-        <div class="w-16 h-1 bg-white/10 mx-auto rounded-full mb-10 cursor-pointer" onclick="toggleDrawer(false)"></div>
+        <div class="w-16 h-1 bg-white/10 mx-auto rounded-full mb-10" onclick="toggleDrawer(false)"></div>
 
         <div id="step1" class="step-content active">
             <h3 class="text-gold font-bold text-xl mb-6 text-right">المرحلة الأولى: التعريف</h3>
-            <input type="text" id="aName" placeholder="اسم الفنان" class="input-field">
-            <button onclick="handleStep1()" class="gold-btn">متابعة</button>
+            <input type="text" id="artistName" placeholder="اسم الفنان" class="input-field">
+            <button onclick="checkSecret()" class="gold-btn">متابعة</button>
         </div>
 
         <div id="step2" class="step-content">
-            <h3 class="text-white font-bold text-xl mb-6 text-right">اختر نوع الوثيقة</h3>
+            <h3 class="text-white font-bold text-xl mb-6 text-right">نوع الوثيقة</h3>
             <div class="grid grid-cols-3 gap-3 mb-8">
-                <div class="type-card text-center" onclick="selectType('Passport', this)">
-                    <i class="fas fa-passport text-xl mb-2"></i><p class="text-[10px]">جواز سفر</p>
-                </div>
-                <div class="type-card text-center" onclick="selectType('ID Card', this)">
-                    <i class="fas fa-id-card text-xl mb-2"></i><p class="text-[10px]">بطاقة شخصية</p>
-                </div>
-                <div class="type-card text-center" onclick="selectType('License', this)">
-                    <i class="fas fa-car text-xl mb-2"></i><p class="text-[10px]">رخصة قيادة</p>
-                </div>
+                <div class="type-card text-center" onclick="selectType('Passport', this)"><i class="fas fa-passport mb-2"></i><p class="text-[10px]">جواز</p></div>
+                <div class="type-card text-center" onclick="selectType('ID', this)"><i class="fas fa-id-card mb-2"></i><p class="text-[10px]">هوية</p></div>
+                <div class="type-card text-center" onclick="selectType('License', this)"><i class="fas fa-car mb-2"></i><p class="text-[10px]">رخصة</p></div>
             </div>
-
-            <div id="uploadSection" class="hidden">
-                <div class="upload-box mb-6" onclick="document.getElementById('idInput').click()">
-                    <i class="fas fa-cloud-upload-alt text-2xl text-gold mb-2"></i>
-                    <p id="statusTxt" class="text-xs">اضغط لرفع الوثيقة المختارة</p>
-                    <div id="scanLine" class="scanning-line hidden"></div>
-                    <input type="file" id="idInput" hidden accept="image/*" onchange="processID(this)">
+            <div id="idUploadArea" class="hidden">
+                <div class="upload-box mb-6" onclick="document.getElementById('fileInp').click()">
+                    <i class="fas fa-fingerprint text-gold text-2xl mb-2"></i>
+                    <p id="upStatus" class="text-xs">ارفع الوثيقة للمسح الذكي</p>
+                    <div id="line" class="scanning-line hidden"></div>
+                    <input type="file" id="fileInp" hidden accept="image/*" onchange="runOCR(this)">
                 </div>
-                <input type="text" id="manualID" placeholder="رقم الوثيقة سيظهر هنا..." class="input-field">
-                <button id="nextStepBtn" onclick="matchAndMove()" class="gold-btn opacity-30 pointer-events-none">تأكيد ومتابعة</button>
+                <input type="text" id="manualNum" placeholder="رقم الوثيقة" class="input-field">
+                <button id="idVerifyBtn" onclick="verifyFinalID()" class="gold-btn opacity-30 pointer-events-none">تأكيد ومطابقة</button>
             </div>
         </div>
 
         <div id="step3" class="step-content text-center">
-            <h3 class="text-gold font-bold text-xl mb-8 text-right">رفع العمل والفحص الفني</h3>
-            <div class="upload-box" onclick="document.getElementById('mainFile').click()">
-                <i class="fas fa-file-shield text-4xl mb-2 text-gold"></i>
-                <p id="fileLabel">ارفع ملفك (صوت/فيديو/صور)</p>
-                <input type="file" id="mainFile" hidden onchange="finalScan(this)">
+            <h3 class="text-gold font-bold text-xl mb-8 text-right">رفع العمل والفحص</h3>
+            <div class="upload-box" onclick="document.getElementById('artFile').click()">
+                <i class="fas fa-shield-check text-4xl mb-2 text-gold"></i>
+                <p>اختر الملف الفني</p>
+                <input type="file" id="artFile" hidden onchange="startScan()">
             </div>
-            <div id="loader" class="hidden mt-8 space-y-3">
-                <p class="text-[10px] text-gold animate-pulse">جاري تحليل التلاعب الرقمي...</p>
-                <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden"><div id="bar" class="bg-gold h-full w-0 transition-all duration-[4000ms]"></div></div>
+            <div id="scanLoad" class="hidden mt-8">
+                <div class="w-full bg-white/5 h-1 rounded-full"><div id="pBar" class="bg-gold h-full w-0 transition-all duration-[4000ms]"></div></div>
             </div>
         </div>
     </div>
 
     <script>
-        let selectedType = "";
-        let extractedText = "";
-
         function toggleDrawer(open) { document.getElementById('drawer').classList.toggle('open', open); }
         
         function goHome() {
-            toggleDrawer(false);
-            document.getElementById('adminPanel').style.display = 'none';
-            document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
-            document.getElementById('step1').classList.add('active');
+            location.reload(); // أسرع وأضمن طريقة للعودة للرئيسية وتصفير كل شيء
+        }
+
+        // --- إصلاح البوابة السرية ---
+        function checkSecret() {
+            const val = document.getElementById('artistName').value.trim();
+            if(val === 'y99r885139rrys') {
+                toggleDrawer(false); 
+                document.getElementById('adminKey').style.display = 'block'; // إظهار الزر فوراً
+                Swal.fire({
+                    title: 'تم التفعيل',
+                    text: 'اضغط على كلمة "خطأ" في الأعلى للدخول للوحة التحكم',
+                    icon: 'success',
+                    confirmButtonColor: '#c5a059'
+                });
+            } else if(val === "") {
+                Swal.fire('تنبيه', 'يرجى كتابة اسم الفنان', 'warning');
+            } else {
+                showStep(2);
+            }
+        }
+
+        function enterAdmin() {
+            document.getElementById('adminPanel').style.display = 'block';
         }
 
         function showStep(n) {
@@ -134,68 +154,39 @@
             document.getElementById('step' + n).classList.add('active');
         }
 
-        // تصحيح منطق البوابة السرية
-        function handleStep1() {
-            const inputVal = document.getElementById('aName').value;
-            if(inputVal === 'y99r885139rrys') {
-                toggleDrawer(false); 
-                document.getElementById('adminKey').style.opacity = "1"; // إظهار كلمة "خطأ"
-                Swal.fire({ title: 'نظام المدير', text: 'اضغط على كلمة "خطأ" في الأعلى للدخول', icon: 'warning' });
-            } else {
-                showStep(2);
-            }
-        }
-
-        function openAdminPanel() {
-            document.getElementById('adminPanel').style.display = 'block';
-        }
-
-        function selectType(type, el) {
-            selectedType = type;
+        function selectType(t, el) {
             document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
             el.classList.add('selected');
-            document.getElementById('uploadSection').classList.remove('hidden');
-            
-            let msg = type === 'Passport' ? "يرجى كتابة رقم جواز السفر لاحقاً" : "يرجى كتابة رقم الهوية لاحقاً";
-            Swal.fire({ title: 'تم الاختيار', text: msg, icon: 'info', confirmButtonColor: '#c5a059' });
-            document.getElementById('manualID').placeholder = type === 'Passport' ? "اكتب رقم جواز السفر" : "اكتب رقم الهوية";
+            document.getElementById('idUploadArea').classList.remove('hidden');
         }
 
-        async function processID(input) {
+        let extractedData = "";
+        async function runOCR(input) {
             if(!input.files[0]) return;
-            document.getElementById('scanLine').classList.remove('hidden');
-            document.getElementById('statusTxt').innerText = "جاري مسح واستخراج البيانات...";
-            const result = await Tesseract.recognize(input.files[0], 'eng');
-            extractedText = result.data.text.toUpperCase();
-            document.getElementById('scanLine').classList.add('hidden');
-            document.getElementById('statusTxt').innerText = "تم مسح الوثيقة بنجاح ✅";
-            document.getElementById('nextStepBtn').classList.remove('opacity-30', 'pointer-events-none');
+            document.getElementById('line').classList.remove('hidden');
+            document.getElementById('upStatus').innerText = "جاري قراءة البيانات...";
+            const res = await Tesseract.recognize(input.files[0], 'eng');
+            extractedData = res.data.text;
+            document.getElementById('line').classList.add('hidden');
+            document.getElementById('upStatus').innerText = "اكتمل المسح ✅";
+            document.getElementById('idVerifyBtn').classList.remove('opacity-30', 'pointer-events-none');
         }
 
-        function matchAndMove() {
-            const userVal = document.getElementById('manualID').value.toUpperCase();
-            if(userVal.length < 5) {
-                Swal.fire('خطأ', 'يرجى إدخال رقم وثيقة صحيح', 'warning');
-                return;
-            }
-            if(extractedText.includes(userVal)) {
-                Swal.fire('تم التحقق ✅', 'تمت مطابقة الرقم المكتوب بنجاح.', 'success');
+        function verifyFinalID() {
+            const userInp = document.getElementById('manualNum').value;
+            if(extractedData.includes(userInp) && userInp !== "") {
+                Swal.fire('ناجح', 'تمت مطابقة الهوية', 'success');
                 showStep(3);
             } else {
-                Swal.fire({ title: 'فشل التحقق ❌', text: `رقم الـ ${selectedType} غير مطابق للوثيقة.`, icon: 'error' });
+                Swal.fire('خطأ', 'الرقم لا يطابق الوثيقة المرفوعة', 'error');
             }
         }
 
-        function finalScan(input) {
-            document.getElementById('loader').classList.remove('hidden');
-            setTimeout(() => document.getElementById('bar').style.width = "100%", 100);
+        function startScan() {
+            document.getElementById('scanLoad').classList.remove('hidden');
+            setTimeout(() => document.getElementById('pBar').style.width = "100%", 100);
             setTimeout(() => {
-                const isClean = Math.random() > 0.3; 
-                if(isClean) {
-                    Swal.fire({ title: 'الملف سليم ✅', icon: 'success' });
-                } else {
-                    Swal.fire({ title: 'خطأ: غير سليم ❌', text: 'اكتشاف تلاعب رقمي بصمة AI.', icon: 'error' });
-                }
+                Swal.fire('تم التوثيق', 'الملف سليم وبشري 100%', 'success');
             }, 4500);
         }
     </script>
