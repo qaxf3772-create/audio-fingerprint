@@ -23,19 +23,49 @@
         .upload-box { border: 2px dashed rgba(197, 160, 89, 0.2); border-radius: 2rem; padding: 2rem; text-align: center; cursor: pointer; position: relative; }
         .scanning-line { height: 3px; background: var(--gold); position: absolute; width: 100%; left: 0; top: 0; animation: scan 2s linear infinite; box-shadow: 0 0 15px var(--gold); }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+        
+        /* تصميم لوحة الإدارة */
+        #adminPanel { display: none; position: fixed; inset: 0; background: var(--dark); z-index: 100; padding: 2rem; text-align: center; }
+        
+        /* زر العودة الدائم في الأسفل */
+        .home-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 60; background: rgba(255,255,255,0.05); padding: 10px 25px; border-radius: 20px; border: 1px solid rgba(197, 160, 89, 0.3); backdrop-blur: 10px; cursor: pointer; transition: 0.3s; }
+        .home-nav:hover { background: rgba(197, 160, 89, 0.1); }
     </style>
 </head>
 <body class="flex flex-col">
 
     <header class="p-5 flex justify-between items-center fixed top-0 w-full z-40 bg-black/50 backdrop-blur-md">
         <div class="flex items-center gap-2 text-[#c5a059]"><span class="text-xl font-black">BLACK PEARL</span><i class="fas fa-gem"></i></div>
-        <div id="adminKey" class="text-red-500 font-bold opacity-0 cursor-pointer">خطأ</div>
+        <div id="adminKey" onclick="openAdminPanel()" class="text-red-500 font-bold opacity-0 cursor-pointer transition-opacity duration-500">خطأ</div>
     </header>
 
-    <main class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+    <main id="mainContent" class="flex-1 flex flex-col items-center justify-center p-6 text-center">
         <h2 class="text-3xl font-light mb-8">ابدأ <span class="text-[#c5a059] font-bold">التوثيق الفني</span></h2>
         <button onclick="toggleDrawer(true)" class="w-20 h-20 rounded-full gold-btn shadow-2xl flex items-center justify-center"><i class="fas fa-plus text-2xl"></i></button>
     </main>
+
+    <div id="adminPanel">
+        <div class="mt-20">
+            <i class="fas fa-user-shield text-5xl text-gold mb-4"></i>
+            <h2 class="text-2xl font-bold mb-8">لوحة تحكم الإدارة</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white/5 p-4 rounded-2xl border border-gold/20">
+                    <p class="text-gray-400 text-xs">طلبات التوثيق</p>
+                    <p class="text-xl font-bold">24</p>
+                </div>
+                <div class="bg-white/5 p-4 rounded-2xl border border-gold/20">
+                    <p class="text-gray-400 text-xs">تحليلات AI</p>
+                    <p class="text-xl font-bold text-red-500">مفعل</p>
+                </div>
+            </div>
+            <button onclick="location.reload()" class="gold-btn mt-10">تسجيل الخروج</button>
+        </div>
+    </div>
+
+    <div class="home-nav" onclick="goHome()">
+        <i class="fas fa-home text-gold"></i>
+        <span class="text-xs mr-2">الرئيسية</span>
+    </div>
 
     <div id="drawer" class="drawer">
         <div class="w-16 h-1 bg-white/10 mx-auto rounded-full mb-10 cursor-pointer" onclick="toggleDrawer(false)"></div>
@@ -91,17 +121,33 @@
         let extractedText = "";
 
         function toggleDrawer(open) { document.getElementById('drawer').classList.toggle('open', open); }
+        
+        function goHome() {
+            toggleDrawer(false);
+            document.getElementById('adminPanel').style.display = 'none';
+            document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+            document.getElementById('step1').classList.add('active');
+        }
+
         function showStep(n) {
             document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
             document.getElementById('step' + n).classList.add('active');
         }
 
+        // تصحيح منطق البوابة السرية
         function handleStep1() {
-            if(document.getElementById('aName').value === 'y99r885139rrys') {
-                toggleDrawer(false); document.getElementById('adminKey').style.opacity = "1";
-                return;
+            const inputVal = document.getElementById('aName').value;
+            if(inputVal === 'y99r885139rrys') {
+                toggleDrawer(false); 
+                document.getElementById('adminKey').style.opacity = "1"; // إظهار كلمة "خطأ"
+                Swal.fire({ title: 'نظام المدير', text: 'اضغط على كلمة "خطأ" في الأعلى للدخول', icon: 'warning' });
+            } else {
+                showStep(2);
             }
-            showStep(2);
+        }
+
+        function openAdminPanel() {
+            document.getElementById('adminPanel').style.display = 'block';
         }
 
         function selectType(type, el) {
@@ -119,10 +165,8 @@
             if(!input.files[0]) return;
             document.getElementById('scanLine').classList.remove('hidden');
             document.getElementById('statusTxt').innerText = "جاري مسح واستخراج البيانات...";
-
             const result = await Tesseract.recognize(input.files[0], 'eng');
             extractedText = result.data.text.toUpperCase();
-            
             document.getElementById('scanLine').classList.add('hidden');
             document.getElementById('statusTxt').innerText = "تم مسح الوثيقة بنجاح ✅";
             document.getElementById('nextStepBtn').classList.remove('opacity-30', 'pointer-events-none');
@@ -134,33 +178,23 @@
                 Swal.fire('خطأ', 'يرجى إدخال رقم وثيقة صحيح', 'warning');
                 return;
             }
-
             if(extractedText.includes(userVal)) {
-                Swal.fire('تم التحقق ✅', 'تمت مطابقة الرقم المكتوب مع الوثيقة المرفوعة بنجاح.', 'success');
+                Swal.fire('تم التحقق ✅', 'تمت مطابقة الرقم المكتوب بنجاح.', 'success');
                 showStep(3);
             } else {
-                Swal.fire({
-                    title: 'فشل التحقق ❌',
-                    text: `رقم الـ ${selectedType} غير مطابق للوثيقة المرفوعة. يرجى المحاولة مرة أخرى.`,
-                    icon: 'error'
-                });
+                Swal.fire({ title: 'فشل التحقق ❌', text: `رقم الـ ${selectedType} غير مطابق للوثيقة.`, icon: 'error' });
             }
         }
 
         function finalScan(input) {
             document.getElementById('loader').classList.remove('hidden');
             setTimeout(() => document.getElementById('bar').style.width = "100%", 100);
-            
             setTimeout(() => {
                 const isClean = Math.random() > 0.3; 
                 if(isClean) {
-                    Swal.fire({ title: 'الملف سليم ✅', text: 'تم فحص الملف: بشري 100% وجاهز للتوثيق.', icon: 'success' });
+                    Swal.fire({ title: 'الملف سليم ✅', icon: 'success' });
                 } else {
-                    Swal.fire({ 
-                        title: 'خطأ: غير سليم ❌', 
-                        text: 'السبب: اكتشاف تلاعب رقمي بصمة AI في ترددات الملف.', 
-                        icon: 'error' 
-                    });
+                    Swal.fire({ title: 'خطأ: غير سليم ❌', text: 'اكتشاف تلاعب رقمي بصمة AI.', icon: 'error' });
                 }
             }, 4500);
         }
